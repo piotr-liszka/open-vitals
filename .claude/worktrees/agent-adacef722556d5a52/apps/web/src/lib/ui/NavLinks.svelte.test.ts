@@ -1,0 +1,182 @@
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+import { render, cleanup } from '@testing-library/svelte';
+import { readable } from 'svelte/store';
+
+/**
+ * Mutable stand-in for SvelteKit's `page` store — each test sets the URL the server rendered, and
+ * since spec 064 also the `data` the root layout load returns (the sidebar reads the user's own
+ * dashboards from there).
+ */
+const state = { url: new URL('http://openvitals.test/'), data: {} as Record<string, unknown> };
+
+vi.mock('$app/stores', () => ({
+  page: readable<{ url: URL; data: Record<string, unknown> }>({ url: state.url, data: state.data }, (set) => {
+    set({ url: state.url, data: state.data });
+    return () => {};
+  })
+}));
+
+const { default: NavLinks } = await import('./NavLinks.svelte');
+
+beforeEach(() => {
+  state.url = new URL('http://openvitals.test/');
+  state.data = {};
+});
+
+afterEach(cleanup);
+
+const links = (c: HTMLElement): HTMLAnchorElement[] => Array.from(c.querySelectorAll('a.nav-item'));
+/**
+ * An item's label. Read from the `.label` span rather than the anchor's `textContent`, because since
+ * spec 063 the anchor also contains an icon — asserting on the whole subtree would couple every one
+ * of these tests to the icon markup.
+ */
+const labelOf = (a: HTMLAnchorElement): string | null => a.querySelector('.label')?.textContent ?? null;
+const headings = (c: HTMLElement): HTMLElement[] => Array.from(c.querySelectorAll('.group-title'));
+
+describe('NavLinks', () => {
+  it('renders one heading per group and none for the ungrouped run', () => {
+    const { container } = render(NavLinks);
+
+    expect(headings(container).map((h) => h.textContent)).toEqual(['Trening', 'Zdrowie', 'System']);
+    // Start is ungrouped, so the first list carries no heading at all.
+    const lists = Array.from(container.querySelectorAll('ul.items'));
+    expect(lists[0]!.getAttribute('aria-labelledby')).toBeNull();
+  });
+
+  it('ties each heading to the list it labels, so the grouping reaches assistive tech', () => {
+    const { container } = render(NavLinks);
+
+    for (const h of headings(container)) {
+      const id = h.getAttribute('id');
+      expect(id).toBeTruthy();
+      const list = container.querySelector(`ul[aria-labelledby="${id}"]`);
+      expect(list).not.toBeNull();
+    }
+  });
+
+  it('keeps headings out of the tab order — they label, they do not navigate', () => {
+    const { container } = render(NavLinks);
+
+    for (const h of headings(container)) {
+      expect(h.tagName).toBe('H2');
+      expect(h.querySelector('a, button')).toBeNull();
+      expect(h.hasAttribute('tabindex')).toBe(false);
+    }
+  });
+
+  it('marks a section parent active from a subpage', () => {
+    state.url = new URL('http://openvitals.test/training/run');
+    const { container } = render(NavLinks);
+
+    const active = links(container).filter((a) => a.classList.contains('active'));
+    expect(active.map(labelOf)).toEqual(['Analiza']);
+  });
+
+  it('activates Aktywności on the map tab — the heat map is inside that section now', () => {
+    state.url = new URL('http://openvitals.test/activities/map');
+    const { container } = render(NavLinks);
+
+    const active = links(container).filter((a) => a.classList.contains('active'));
+    expect(active.map(labelOf)).toEqual(['Aktywności']);
+  });
+
+  it('does not light up Start on every page', () => {
+    state.url = new URL('http://openvitals.test/insights');
+    const { container } = render(NavLinks);
+
+    const active = links(container).filter((a) => a.classList.contains('active'));
+    expect(active.map(labelOf)).toEqual(['Wnioski']);
+  });
+
+  it('carries the active range across to range-aware destinations', () => {
+    state.url = new URL('http://openvitals.test/insights?range=365');
+    const { container } = render(NavLinks);
+
+    const training = links(container).find((a) => labelOf(a) === 'Analiza')!;
+    expect(training.getAttribute('href')).toContain('range=365');
+  });
+
+  /**
+   * Spec 088. `Analiza` and `Plan treningowy` are two sidebar entries over one URL tree, so exactly
+   * one of them may be current on any page of it — the deeper entry where it applies, its parent
+   * everywhere else.
+   */
+  describe('the two training entries (spec 088)', () => {
+    const currentLabels = (path: string): (string | null)[] => {
+      state.url = new URL(`http://openvitals.test${path}`);
+      const { container } = render(NavLinks);
+      return links(container)
+        .filter((a) => a.getAttribute('aria-current') === 'page')
+        .map(labelOf);
+    };
+
+    it('shows both entries under one Trening heading', () => {
+      const { container } = render(NavLinks);
+      const trainingHeading = headings(container).find((h) => h.textContent === 'Trening')!;
+      const list = container.querySelector(`ul[aria-labelledby="${trainingHeading.getAttribute('id')}"]`);
+      const labels = Array.from(list!.querySelectorAll('a.nav-item')).map(
+        (a) => a.querySelector('.label')?.textContent
+      );
+      expect(labels).toEqual(['Analiza', 'Plan treningowy', 'Aktywności']);
+      // One heading, not two: a split group would render `Trening` twice.
+      expect(headings(container).filter((h) => h.textContent === 'Trening')).toHaveLength(1);
+    });
+
+    it('marks exactly one entry current on every training page', () => {
+      expect(currentLabels('/training')).toEqual(['Analiza']);
+      cleanup();
+      expect(currentLabels('/training/run')).toEqual(['Analiza']);
+      cleanup();
+      expect(currentLabels('/training/plan')).toEqual(['Plan treningowy']);
+      cleanup();
+      // `Cele` is the plan section's second tab and sits outside its prefix, so `Plan treningowy`
+      // claims it via `owns`. The sidebar and the tab bar have to name the same section, or the page
+      // says `Analiza` on the left and `Plan · Cele` above the content.
+      expect(currentLabels('/training/goals')).toEqual(['Plan treningowy']);
+    });
+  });
+
+  /**
+   * Spec 063. The sidebar leans on "has an icon" to mean "is a destination" — which only works if the
+   * two categories stay disjoint. Both halves are asserted here, because either one drifting on its
+   * own quietly restores the bug the spec was written to fix.
+   */
+  describe('icons distinguish links from headings (spec 063)', () => {
+    it('gives every item an icon', () => {
+      const { container } = render(NavLinks);
+
+      const items = links(container);
+      expect(items.length).toBeGreaterThan(0);
+      for (const a of items) {
+        expect(a.querySelector('svg[data-icon]')).not.toBeNull();
+      }
+    });
+
+    it('gives no heading an icon', () => {
+      const { container } = render(NavLinks);
+
+      for (const h of headings(container)) {
+        expect(h.querySelector('svg')).toBeNull();
+      }
+    });
+
+    /** The icon-only state hides labels in CSS, so the tooltip is the mouse user's only readout. */
+    it('carries the label as a title, for the collapsed state', () => {
+      const { container } = render(NavLinks);
+
+      for (const a of links(container)) {
+        expect(a.getAttribute('title')).toBe(labelOf(a));
+      }
+    });
+
+    /** `aria-current` is what a screen reader announces; the `.active` class is only paint. */
+    it('marks the current page with aria-current, not colour alone', () => {
+      state.url = new URL('http://openvitals.test/insights');
+      const { container } = render(NavLinks);
+
+      const current = links(container).filter((a) => a.getAttribute('aria-current') === 'page');
+      expect(current.map(labelOf)).toEqual(['Wnioski']);
+    });
+  });
+});

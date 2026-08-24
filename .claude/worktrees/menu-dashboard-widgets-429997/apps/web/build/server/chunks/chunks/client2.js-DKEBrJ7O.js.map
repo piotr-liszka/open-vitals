@@ -1,0 +1,1 @@
+{"version":3,"file":"client2.js-DKEBrJ7O.js","sources":["../../../../.svelte-kit/output/server/chunks/client2.js"],"sourcesContent":["import { s as stores } from \"./client.js\";\n({\n  check: stores.updated.check\n});\n"],"names":[],"mappings":";;AACA,CAAC;AACD,EAAE,KAAK,EAAE,MAAM,CAAC,OAAO,CAAC;AACxB,CAAC"}

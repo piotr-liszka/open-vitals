@@ -1,0 +1,133 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte';
+  import RangeBadge from './RangeBadge.svelte';
+
+  interface Props {
+    title?: string;
+    subtitle?: string;
+    /** Optional header-right actions (buttons, badges…). */
+    actions?: Snippet;
+    /**
+     * Let absolutely-positioned header content escape the card's rounded clip (spec 086).
+     *
+     * Off by default, because that clip is what keeps a full-bleed map or table inside the radius.
+     * Turn it on for a card whose header carries an `InfoPopover`: its panel hangs below the trigger
+     * and is routinely taller than the card, so under the default clip the explanation is cut in half.
+     */
+    overflowVisible?: boolean;
+    /**
+     * Set when this card's content follows the global range (spec 047) — pass the resolved label,
+     * e.g. "30 dni". Renders a `RangeBadge` in the header. Leave unset for cards that ignore the
+     * range: absence of the badge is what tells the reader a number is not windowed.
+     */
+    range?: string | undefined;
+    /** What one point/row covers once a long range buckets the data ("week", "month"). */
+    rangeBucketNoun?: string | undefined;
+    /** Card body. */
+    children?: Snippet;
+  }
+
+  let {
+    title,
+    subtitle,
+    actions,
+    range,
+    rangeBucketNoun,
+    overflowVisible = false,
+    children
+  }: Props = $props();
+
+  const hasHeader = $derived(Boolean(title || subtitle || actions || range));
+</script>
+
+<section class="card" class:overflow-visible={overflowVisible}>
+  {#if hasHeader}
+    <header class="card-header">
+      <div class="titles">
+        {#if title}<h3 class="title">{title}</h3>{/if}
+        {#if subtitle}<p class="subtitle">{subtitle}</p>{/if}
+      </div>
+      {#if range || actions}
+        <div class="actions">
+          {#if range}<RangeBadge label={range} bucketNoun={rangeBucketNoun} />{/if}
+          {@render actions?.()}
+        </div>
+      {/if}
+    </header>
+  {/if}
+  <div class="card-body">
+    {@render children?.()}
+  </div>
+</section>
+
+<style>
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .card.overflow-visible {
+    overflow: visible;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .titles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .title {
+    font-size: var(--text-md);
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text);
+  }
+
+  .subtitle {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+    /* A long "cały czas (od …)" badge beside a card's own actions wraps instead of overflowing the
+       header on a phone (spec 034). */
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .card-body {
+    padding: var(--space-5);
+  }
+
+  /* On a phone, a title/subtitle sharing the row with actions (range badge, sport filter…) gets
+     squeezed into a sliver next to them. Stack instead: the title/subtitle take the full width and
+     the actions drop to their own row below, left-aligned like everything else on the card. */
+  @media (max-width: 640px) {
+    .card-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .actions {
+      justify-content: flex-start;
+    }
+  }
+</style>

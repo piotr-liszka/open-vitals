@@ -1,0 +1,306 @@
+/*
+ * OpenVitals — design tokens (single source of truth).
+ *
+ * World: "Race Telemetry / Instrument" — athletic + energetic, Operate mode.
+ * Signal-magenta signature, ink-on-magenta controls, per-metric "lane" colors for data,
+ * heavy tabular numerals as the hero, crisp hairline grids, snappy purposeful motion.
+ * Deliberately NOT the neon-on-black glow cluster. Light + dark via [data-theme].
+ *
+ * RULE: components reference these variables only — never raw hex or magic px. See AGENTS.md §6.
+ * The SEMANTIC names (--color-*, --space-*, --text-*) are a stable API; feature code and
+ * lib/ui use those. The primitive scales below are internal to this file.
+ */
+
+:root {
+  /* ---- Primitive palette (raw scales — do not use directly in components) ---- */
+  /* Cool ink neutrals — the instrument chassis. */
+  --ink-950: #070a0f;
+  --ink-900: #0c1119;
+  --ink-850: #111825;
+  --ink-800: #182230;
+  --ink-700: #22303f;
+  --ink-600: #35485a;
+  --ink-500: #566878;
+  --ink-400: #7d8fa0;
+  --ink-300: #a7b4c1;
+  --ink-200: #d0d8e0;
+  --ink-100: #e7ecf1;
+  --ink-50: #f3f6f9;
+
+  /* Signal magenta — the signature energy. Hue ~328°, which is the one wide gap the metric lanes
+     leave open (violet 277° → red 349°), so the accent can never be misread as a data series. */
+  --magenta-300: #ffa6d8;
+  --magenta-400: #ff6ec0;
+  --magenta-500: #ff2f9e;
+  --magenta-600: #ec0d84;
+  --magenta-700: #b80767;
+
+  /* Metric "lane" hues — each channel a recognizable color, used for data + tiles. */
+  --lane-orange: #ff5c26; /* steps / movement */
+  --lane-red: #fb3b5e; /* heart / resting HR */
+  --lane-indigo: #6d76f5; /* sleep */
+  --lane-cyan: #14c4e0; /* body battery */
+  --lane-green: #24c67e; /* HRV */
+  --lane-amber: #f7a833; /* stress */
+  --lane-sky: #38bdf8; /* SpO2 */
+  --lane-teal: #16c4a8; /* respiration */
+  --lane-violet: #b062f0; /* body composition */
+  --lane-lime: #b6e021; /* calories */
+
+  /* Default multi-series chart palette — ordered for hue separation so adjacent series in a
+     legend never read as "the same colour, slightly off". Charts pick these in order when a
+     series brings no colour of its own; a metric with a lane keeps its lane instead. */
+  --chart-series-1: var(--lane-orange);
+  --chart-series-2: var(--lane-cyan);
+  --chart-series-3: var(--lane-violet);
+  --chart-series-4: var(--lane-green);
+  --chart-series-5: var(--lane-amber);
+  --chart-series-6: var(--lane-sky);
+
+  --green-400: #34d399;
+  --green-500: #12b981;
+  --green-600: #059669;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --red-400: #fb7185;
+  --red-500: #f43f5e;
+  --red-600: #e11d48;
+  --sky-500: #0ea5e9;
+
+  /* ---- Typography ---- */
+  /* Operate mode → workhorse system stack (self-hosted-safe; no external CDN). */
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+  /* Apply to numeric readouts so digits align in columns and don't jitter when counting. */
+  --numeric: 'tnum' 1, 'lnum' 1, 'cv01' 1;
+
+  --text-xs: 0.75rem; /* 12 */
+  --text-sm: 0.8125rem; /* 13 */
+  --text-base: 0.875rem; /* 14 */
+  --text-md: 1rem; /* 16 */
+  --text-lg: 1.125rem; /* 18 */
+  --text-xl: 1.375rem; /* 22 */
+  --text-2xl: 1.75rem; /* 28 */
+  --text-3xl: 2.25rem; /* 36 */
+  --text-4xl: 3rem; /* 48 — hero readouts */
+  --text-5xl: 3.75rem; /* 60 */
+
+  /* Fluid numeric readouts — the big numbers are the hero of this UI, so they scale with the
+     viewport instead of crowding a phone-width tile. Each is clamp(phone floor, fluid, the fixed
+     --text-* step the desktop layout already used), so desktop is unchanged and phones shrink.
+     Use these (not --text-3xl/4xl/5xl) for any value a user reads as a number. */
+  --readout-sm: clamp(1.125rem, 0.95rem + 0.9vw, var(--text-xl)); /* 18 → 22 */
+  --readout-md: clamp(1.375rem, 1.05rem + 1.6vw, var(--text-2xl)); /* 22 → 28 */
+  --readout-lg: clamp(1.625rem, 1.15rem + 2.2vw, var(--text-3xl)); /* 26 → 36 */
+  --readout-xl: clamp(1.875rem, 1.15rem + 3.6vw, var(--text-4xl)); /* 30 → 48 */
+  --readout-2xl: clamp(2.25rem, 1.3rem + 4.8vw, var(--text-5xl)); /* 36 → 60 */
+  /* The unit/suffix that sits beside a hero readout. */
+  --readout-unit: clamp(0.875rem, 0.78rem + 0.5vw, var(--text-lg)); /* 14 → 18 */
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-black: 800;
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+
+  --tracking-tight: -0.02em;
+  --tracking-tighter: -0.035em;
+  --tracking-wide: 0.04em;
+  --tracking-widest: 0.14em; /* instrument labels — uppercase micro caps */
+
+  /* ---- Spacing scale (4px base) ---- */
+  --space-0: 0;
+  --space-1: 0.25rem; /* 4 */
+  --space-2: 0.5rem; /* 8 */
+  --space-3: 0.75rem; /* 12 */
+  --space-4: 1rem; /* 16 */
+  --space-5: 1.25rem; /* 20 */
+  --space-6: 1.5rem; /* 24 */
+  --space-8: 2rem; /* 32 */
+  --space-10: 2.5rem; /* 40 */
+  --space-12: 3rem; /* 48 */
+  --space-16: 4rem; /* 64 */
+
+  /* ---- Radius — crisp instrument corners ---- */
+  --radius-sm: 5px;
+  --radius-md: 9px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* ---- Layout ---- */
+  --topbar-height: 60px;
+  --container-max: 1240px;
+
+  /* ---- Sidebar collapse (spec 063) ----
+     `--nav-icon` and `--nav-inset` are the contract that makes the icon-only state a WIDTH change and
+     nothing else: an icon's left edge is `--nav-inset` from the sidebar edge in every state, so
+     collapsing slides the labels away instead of re-laying-out the column. `--sidebar-width-icons` is
+     DERIVED from the pair — never tune it by hand, or the two visible states drift apart and the icons
+     visibly jump on toggle.
+
+     `--sidebar-width` is then the ONE value the collapse changes, redefined per state on the root
+     below. Both the sidebar's own width and the frame's left margin already read it, so the whole
+     three-state layout is these three rules and no component logic at all. The attribute is written
+     pre-paint in `app.html` (like the theme), which is what keeps a collapsed sidebar from reflowing
+     the page in front of the reader on every load. */
+  --nav-icon: 20px;
+  --nav-inset: var(--space-6); /* --space-3 nav padding + --space-3 item padding */
+  --sidebar-width-full: 248px;
+  --sidebar-width-icons: calc(var(--nav-inset) * 2 + var(--nav-icon));
+  --sidebar-width: var(--sidebar-width-full);
+
+  /* ---- Stacking order (single source of truth, spec 034) ----
+     Third-party layers are the reason these numbers are high: Leaflet paints its own panes and
+     controls between 200 and 800, so app chrome sits ABOVE that range and a stray map layer can
+     never cover the drawer. Embedded maps are additionally isolated (LeafletMap.svelte), which is
+     the real fix; this scale is the guardrail. Never write a bare z-index in a component. */
+  --z-content: 1; /* in-card overlays: badges over a thumbnail, chart tooltips */
+  --z-sticky: 900; /* sticky top bar / table headers */
+  --z-scrim: 950; /* drawer backdrop */
+  --z-drawer: 960; /* the sidebar drawer itself */
+  --z-toast: 1000; /* transient, always on top */
+
+  /* ---- Motion — snappy, energetic, purposeful ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --transition-fast: 110ms var(--ease-out);
+  --transition-base: 180ms var(--ease-out);
+  --transition-slow: 320ms var(--ease-out);
+  /* Bare durations for @keyframes (the transition-* tokens above bundle easing). */
+  --duration-fast: 110ms;
+  --duration-base: 180ms;
+  --duration-slow: 320ms;
+  /* Per-item delay for staggered entrances. */
+  --motion-stagger: 45ms;
+  /* Sweep duration for skeleton shimmer. */
+  --duration-shimmer: 1400ms;
+
+  /* ---- Semantic accent (stable across themes) ---- */
+  --color-accent: var(--magenta-500);
+  --color-accent-hover: var(--magenta-600);
+  --color-accent-soft: color-mix(in srgb, var(--magenta-500) 15%, transparent);
+  --color-accent-line: color-mix(in srgb, var(--magenta-500) 60%, transparent);
+  --color-on-accent: var(--ink-950); /* ink on magenta — bold + AA legible */
+
+  /*
+    The accent has two jobs and they want different steps.
+
+    As TEXT or a LINE on a light surface it has to be dark enough to read against white, which is why
+    the light theme pushes --color-accent down to magenta-600. As the FILL under an ink label it has
+    to be *bright*, because the label's contrast is measured against the fill: ink lands at 4.68:1 on
+    magenta-600 and 5.81:1 on magenta-500 — both technically AA, both visibly muddy — against 7.78:1
+    on magenta-400 and 10.9:1 on the magenta-300 hover. So filled controls carrying a label take the
+    bright step in BOTH themes and never inherit the text grade (specs 049, 051).
+
+    Inverting instead of brightening does not work: white on magenta-500 is 3.41:1 and fails AA.
+  */
+  --color-accent-fill: var(--magenta-400);
+  --color-accent-fill-hover: var(--magenta-300);
+}
+
+/*
+  The three sidebar states (spec 063), expressed as one redefined width. Written pre-paint by the
+  bootstrap script in `app.html` and rewritten by `SidebarToggle`; nothing else in the app reads the
+  attribute for layout.
+*/
+:root[data-sidebar='icons'] {
+  --sidebar-width: var(--sidebar-width-icons);
+}
+:root[data-sidebar='hidden'] {
+  --sidebar-width: 0px;
+}
+
+/* ================= LIGHT THEME ================= */
+:root,
+:root[data-theme='light'] {
+  --color-bg: var(--ink-100);
+  --color-surface: #ffffff;
+  --color-surface-2: var(--ink-50);
+  --color-surface-hover: var(--ink-100);
+  --color-border: var(--ink-200);
+  --color-border-strong: var(--ink-300);
+  /* Instrument hairline grid — faint on light. */
+  --color-grid: color-mix(in srgb, var(--ink-400) 22%, transparent);
+
+  --color-text: var(--ink-900);
+  --color-text-muted: var(--ink-500);
+  --color-text-subtle: var(--ink-400);
+  --color-text-on-surface: var(--ink-800);
+
+  /* Accent as *text/line* on light needs the darker step for AA. */
+  --color-accent: var(--magenta-600);
+  --color-accent-hover: var(--magenta-700);
+
+  --color-success: var(--green-600);
+  --color-success-soft: color-mix(in srgb, var(--green-500) 16%, transparent);
+  --color-warning: var(--amber-500);
+  --color-warning-soft: color-mix(in srgb, var(--amber-400) 20%, transparent);
+  --color-danger: var(--red-600);
+  --color-danger-soft: color-mix(in srgb, var(--red-500) 14%, transparent);
+  --color-info: var(--sky-500);
+  --color-info-soft: color-mix(in srgb, var(--sky-500) 16%, transparent);
+
+  --shadow-sm: 0 1px 2px rgba(12, 17, 25, 0.08);
+  --shadow-md: 0 6px 18px rgba(12, 17, 25, 0.1);
+  --shadow-lg: 0 18px 40px rgba(12, 17, 25, 0.14);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--magenta-500) 40%, transparent);
+
+  --color-overlay: color-mix(in srgb, var(--ink-950) 45%, transparent);
+
+  /* Skeleton placeholder — base block + brighter sheen that sweeps across it. */
+  --color-skeleton: var(--ink-200);
+  --color-skeleton-sheen: var(--ink-50);
+}
+
+/* ================= DARK THEME ================= */
+:root[data-theme='dark'] {
+  --color-bg: var(--ink-950);
+  --color-surface: var(--ink-900);
+  --color-surface-2: var(--ink-850);
+  --color-surface-hover: var(--ink-800);
+  --color-border: color-mix(in srgb, var(--ink-600) 55%, transparent);
+  --color-border-strong: var(--ink-600);
+  --color-grid: color-mix(in srgb, var(--ink-400) 14%, transparent);
+
+  --color-text: var(--ink-50);
+  --color-text-muted: var(--ink-400);
+  --color-text-subtle: var(--ink-500);
+  --color-text-on-surface: var(--ink-200);
+
+  --color-accent: var(--magenta-500);
+  --color-accent-hover: var(--magenta-400);
+  --color-accent-soft: color-mix(in srgb, var(--magenta-500) 20%, transparent);
+  --color-accent-line: color-mix(in srgb, var(--magenta-500) 66%, transparent);
+
+  --color-success: var(--green-400);
+  --color-success-soft: color-mix(in srgb, var(--green-500) 22%, transparent);
+  --color-warning: var(--amber-400);
+  --color-warning-soft: color-mix(in srgb, var(--amber-400) 22%, transparent);
+  --color-danger: var(--red-400);
+  --color-danger-soft: color-mix(in srgb, var(--red-500) 24%, transparent);
+  --color-info: var(--sky-500);
+  --color-info-soft: color-mix(in srgb, var(--sky-500) 26%, transparent);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 22px 50px rgba(0, 0, 0, 0.62);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--magenta-500) 50%, transparent);
+
+  --color-overlay: color-mix(in srgb, var(--ink-950) 66%, transparent);
+
+  --color-skeleton: var(--ink-800);
+  --color-skeleton-sheen: var(--ink-700);
+}
+
+/* Metric lane colors are vivid enough to read on both themes; nudge a couple brighter in dark. */
+:root[data-theme='dark'] {
+  --lane-indigo: #838bff;
+  --lane-violet: #c078ff;
+}

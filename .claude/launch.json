@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-dev",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "-f", "docker-compose.dev.yml", "up"],
+      "port": 3000
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+import { ab as attr, a5 as escape_html, Q as derived } from './index.js-D7taQuDv.js';
+
+/* empty css                                       */
+function ThemeToggle($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    let theme = "light";
+    const isDark = derived(() => theme === "dark");
+    $$renderer2.push(`<button type="button" class="theme-toggle svelte-1ihlba3" role="switch"${attr("aria-checked", isDark())} aria-label="Toggle dark mode"${attr("title", isDark() ? "Switch to light mode" : "Switch to dark mode")}><span class="glyph svelte-1ihlba3" aria-hidden="true">${escape_html(isDark() ? "☾" : "☀")}</span></button>`);
+  });
+}
+
+export { ThemeToggle as T };
+//# sourceMappingURL=ThemeToggle.js-T-urDE0b.js.map

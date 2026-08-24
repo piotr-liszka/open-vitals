@@ -1,0 +1,182 @@
+{
+	"/": [
+		"src/routes/+page.server.ts",
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/activities": [
+		"src/routes/activities/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/activities/mapa": [
+		"src/routes/activities/mapa/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/activities/[id]": [
+		"src/routes/activities/[id]/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/analytics": [
+		"src/routes/analytics/+server.ts"
+	],
+	"/api/consent": [
+		"src/routes/api/consent/+server.ts"
+	],
+	"/api/dashboards": [
+		"src/routes/api/dashboards/+server.ts"
+	],
+	"/api/data/coverage": [
+		"src/routes/api/data/coverage/+server.ts"
+	],
+	"/api/garmin/disconnect": [
+		"src/routes/api/garmin/disconnect/+server.ts"
+	],
+	"/api/garmin/setup": [
+		"src/routes/api/garmin/setup/+server.ts"
+	],
+	"/api/garmin/status": [
+		"src/routes/api/garmin/status/+server.ts"
+	],
+	"/api/health": [
+		"src/routes/api/health/+server.ts"
+	],
+	"/api/insights": [
+		"src/routes/api/insights/+server.ts"
+	],
+	"/api/integrations/[provider]/callback": [
+		"src/routes/api/integrations/[provider]/callback/+server.ts"
+	],
+	"/api/integrations/[provider]/connect": [
+		"src/routes/api/integrations/[provider]/connect/+server.ts"
+	],
+	"/api/integrations/[provider]/disconnect": [
+		"src/routes/api/integrations/[provider]/disconnect/+server.ts"
+	],
+	"/api/integrations/[provider]/sync": [
+		"src/routes/api/integrations/[provider]/sync/+server.ts"
+	],
+	"/api/mcp-url": [
+		"src/routes/api/mcp-url/+server.ts"
+	],
+	"/api/season/goals": [
+		"src/routes/api/season/goals/+server.ts"
+	],
+	"/api/season/goals/[id]": [
+		"src/routes/api/season/goals/[id]/+server.ts"
+	],
+	"/api/settings/mcp-token/rotate": [
+		"src/routes/api/settings/mcp-token/rotate/+server.ts"
+	],
+	"/api/sync": [
+		"src/routes/api/sync/+server.ts"
+	],
+	"/api/sync/diagnostics": [
+		"src/routes/api/sync/diagnostics/+server.ts"
+	],
+	"/api/sync/status": [
+		"src/routes/api/sync/status/+server.ts"
+	],
+	"/api/version": [
+		"src/routes/api/version/+server.ts"
+	],
+	"/api/workout-templates": [
+		"src/routes/api/workout-templates/+server.ts"
+	],
+	"/api/workout-templates/[id]": [
+		"src/routes/api/workout-templates/[id]/+server.ts"
+	],
+	"/api/workouts": [
+		"src/routes/api/workouts/+server.ts"
+	],
+	"/api/workouts/[id]": [
+		"src/routes/api/workouts/[id]/+server.ts"
+	],
+	"/auth/callback": [
+		"src/routes/auth/callback/+server.ts"
+	],
+	"/auth/login": [
+		"src/routes/auth/login/+server.ts"
+	],
+	"/auth/logout": [
+		"src/routes/auth/logout/+server.ts"
+	],
+	"/dashboard": [
+		"src/routes/dashboard/+server.ts"
+	],
+	"/dashboard/new": [
+		"src/routes/dashboard/new/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/dashboard/[id]": [
+		"src/routes/dashboard/[id]/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/data": [
+		"src/routes/data/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/heatmap": [
+		"src/routes/heatmap/+server.ts"
+	],
+	"/insights": [
+		"src/routes/insights/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/login": [
+		"src/routes/+layout.server.ts"
+	],
+	"/power": [
+		"src/routes/power/+server.ts"
+	],
+	"/running": [
+		"src/routes/running/+server.ts"
+	],
+	"/settings": [
+		"src/routes/settings/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/settings/integrations": [
+		"src/routes/settings/integrations/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/styleguide": [
+		"src/routes/+layout.server.ts"
+	],
+	"/training": [
+		"src/routes/training/+page.server.ts",
+		"src/routes/training/+layout.server.ts",
+		"src/routes/+layout.server.ts",
+		"src/routes/training/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/training/bieg": [
+		"src/routes/training/bieg/+page.server.ts",
+		"src/routes/training/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/training/cele": [
+		"src/routes/training/cele/+page.server.ts",
+		"src/routes/training/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/training/marsz": [
+		"src/routes/training/marsz/+page.server.ts",
+		"src/routes/training/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/training/objetosc": [
+		"src/routes/training/objetosc/+page.server.ts",
+		"src/routes/training/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/training/plan": [
+		"src/routes/training/plan/+page.server.ts",
+		"src/routes/training/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/training/rower": [
+		"src/routes/training/rower/+page.server.ts",
+		"src/routes/training/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	]
+}

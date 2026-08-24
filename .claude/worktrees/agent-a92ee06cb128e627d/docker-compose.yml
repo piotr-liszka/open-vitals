@@ -1,0 +1,155 @@
+# OpenVitals — PRODUCTION stack (live-code, spec 019). This is the file the NAS deployment uses.
+#
+# The source is BIND-MOUNTED from disk rather than baked into an image, so the update flow is:
+#
+#     copy files  ->  restart the container        (NO image rebuild, no project re-create)
+#
+# The web container compiles the mounted source on start (`pnpm build`), so a restart picks up
+# whatever is on disk. The Python sidecar is interpreted, so it picks up changes on restart directly.
+#
+# Trade-offs vs the image-based stack (kept as docker-compose.image.yml):
+#   + no image rebuild — deploys are a file copy + restart
+#   - container start is slower (it builds: ~1-3 min on a NAS) and needs more RAM during the build
+#   - the running code is whatever is on disk, so a half-copied tree can start a broken build
+# Prefer docker-compose.image.yml when you want an immutable, prebuilt artifact instead.
+#
+# Usage (Container Manager can also just "restart" the containers):
+#   docker compose up -d
+#   docker compose restart web        # after copying new code
+#
+# !! KEEP THE SAME COMPOSE PROJECT NAME when switching stacks. Compose prefixes volumes with the
+# project name (`<project>_db-data`), so starting under a NEW name creates an EMPTY database — you
+# would be logged out, and would have to reconnect Garmin and re-sync. If unsure, pin it explicitly:
+#   docker compose -p <old-project-name> up -d
+#
+# Security model is UNCHANGED: only `web` publishes a port; `garmin` and `db` stay internal.
+
+services:
+  web:
+    image: node:22-alpine
+    # Manual start only: never auto-start on boot / Docker-daemon restart, and never auto-restart
+    # after a crash. Bring the stack up explicitly (`docker compose up -d`, or Start in Container
+    # Manager). Change back to `unless-stopped` if you ever want it to come up with the NAS.
+    restart: "no"
+    working_dir: /app
+    # Install (cached in the node_modules volume after the first run), build the mounted source,
+    # then serve. `server.js` is the custom entry that mounts /mcp and delegates to SvelteKit.
+    # live-reload.mjs installs, builds, serves, then WATCHES the mounted source: after `git pull` it
+    # rebuilds and restarts the server on its own, so deploying needs no restart at all. It swaps the
+    # running server only after a successful build, so a broken pull keeps the old build serving.
+    # `--prod=false` is REQUIRED: NODE_ENV=production (below) makes pnpm skip devDependencies, and the
+    # build toolchain (vite, svelte, esbuild) lives there — without it the build fails "vite: not found".
+    command: >
+      sh -lc "corepack enable &&
+              pnpm install --frozen-lockfile --prefer-offline --prod=false &&
+              node scripts/live-reload.mjs"
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      # Node's default heap can be too small for a Vite build on a NAS; cap it explicitly.
+      NODE_OPTIONS: --max-old-space-size=1024
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?set PUBLIC_BASE_URL in .env}
+      GARMIN_SIDECAR_URL: http://garmin:8081
+      # Shared secret proving a sidecar caller is the web tier (spec 055). Must match the sidecar's
+      # INTERNAL_API_KEY below. Empty = guardrail off (both services log a warning at startup).
+      GARMIN_INTERNAL_KEY: ${INTERNAL_API_KEY:-}
+      # Trust X-Forwarded-For when rate-limiting /mcp auth failures. Set to `on` ONLY behind a
+      # reverse proxy you control — otherwise the header is client-supplied and defeats the limiter.
+      MCP_TRUST_PROXY: ${MCP_TRUST_PROXY:-off}
+      DATABASE_URL: postgres://${POSTGRES_USER:-garmin}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-garmin_bridge}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set GOOGLE_CLIENT_ID in .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set GOOGLE_CLIENT_SECRET in .env}
+      AUTH_ADAPTER: ${AUTH_ADAPTER:-oidc}
+      # Zone "today" resolves in and timestamps render with (spec 018).
+      APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Warsaw}
+      # Background sync cadence in minutes; each tick fast-returns when nothing changed (spec 027).
+      SYNC_INTERVAL_MINUTES: ${SYNC_INTERVAL_MINUTES:-30}
+      # May the sync WRITE locally authored workouts to Garmin (spec 050)? `off` by default: it is the
+      # only code that mutates the Garmin account, and the endpoints are unverified. Turn on only after
+      # scripts/verify-workout-push.sh passes for a real account.
+    depends_on:
+      db:
+        condition: service_healthy
+      garmin:
+        condition: service_started
+    networks:
+      - bridge
+    volumes:
+      # THE POINT: the app runs straight from the copied source on disk.
+      - ./apps/web:/app
+      # Keep deps inside the container (host has no node_modules, and this caches installs).
+      - web-node-modules:/app/node_modules
+      - web-data:/data
+    # Building needs far more headroom than just serving (prod image uses 256m).
+    mem_limit: ${WEB_MEM_LIMIT:-1536m}
+
+  db:
+    image: postgres:16-alpine
+    # Manual start only: never auto-start on boot / Docker-daemon restart, and never auto-restart
+    # after a crash. Bring the stack up explicitly (`docker compose up -d`, or Start in Container
+    # Manager). Change back to `unless-stopped` if you ever want it to come up with the NAS.
+    restart: "no"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-garmin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-garmin_bridge}
+    networks:
+      - bridge
+    volumes:
+      # Same named volume as the prod stack, so your synced data carries over.
+      - db-data:/var/lib/postgresql/data
+    # Gate dependents on real readiness, so nothing spends its first seconds retrying a cold database.
+    # (The sidecar survives one either way since spec 030.) `pg_isready` is the cheap, official probe.
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-garmin} -d ${POSTGRES_DB:-garmin_bridge}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    mem_limit: 256m
+
+  garmin:
+    image: python:3.12-slim
+    working_dir: /app
+    # Deps live in a venv on a named volume, so only the first start pays the install cost.
+    command: >
+      sh -lc "[ -x /opt/venv/bin/python ] || python -m venv /opt/venv;
+              /opt/venv/bin/pip install -q --disable-pip-version-check -r requirements.txt &&
+              exec /opt/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8081"
+    # No `ports:` — internal only, exactly as in prod.
+    expose:
+      - '8081'
+    environment:
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:?set TOKEN_ENCRYPTION_KEY in .env}
+      DATABASE_URL: postgres://${POSTGRES_USER:-garmin}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-garmin_bridge}
+      # Must match the web service's GARMIN_INTERNAL_KEY (spec 055). Without it, anything on this
+      # Docker network can assert any X-User-Id and read that user's Garmin data.
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
+    # Wait for Postgres to actually accept connections. Since spec 030 the sidecar no longer dies on a
+    # cold database — it retries for ~60s and then starts anyway, repairing on first use — so this gate
+    # is now an optimisation (no failed-connect noise at boot), not the thing keeping the service alive.
+    depends_on:
+      db:
+        condition: service_healthy
+    # Belt and braces: if Postgres is bounced later, come back instead of staying down for good.
+    # (`on-failure` does not auto-start the stack on boot, so manual start is preserved.)
+    restart: on-failure
+    networks:
+      - bridge
+    volumes:
+      - ./services/garmin:/app
+      - garmin-venv:/opt/venv
+    mem_limit: 512m
+
+networks:
+  bridge:
+    driver: bridge
+
+volumes:
+  web-data:
+  db-data:
+  web-node-modules:
+  garmin-venv:

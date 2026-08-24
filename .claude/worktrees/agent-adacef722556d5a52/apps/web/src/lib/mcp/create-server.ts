@@ -1,0 +1,196 @@
+/** Build an MCP server instance with the Garmin tools registered against an injected GarminService. */
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
+import {
+  DEFAULT_TOOL_CONTEXT,
+  GARMIN_TOOLS,
+  interpretHealthMessages,
+  type ToolArgs,
+  type ToolContext
+} from './tools';
+import { WORKOUT_TOOLS, type WorkoutToolDeps } from './workout-tools';
+import { SEASON_TOOLS, type SeasonToolDeps } from './season-tools';
+import { BLOCK_TOOLS, type BlockToolDeps } from './block-tools';
+import { JOURNAL_TOOLS, type JournalToolDeps } from './journal-tools';
+import { ACTIVITY_TOOLS, type ActivityToolDeps } from './activity-tools';
+import { ANALYSIS_TOOLS, type AnalysisToolDeps } from './analysis-tools';
+import type { GarminService } from '../server/interfaces';
+
+/**
+ * @param ctx clock + timezone the date-aware tools resolve "today" with (spec 018). Defaults to the
+ *            system clock in the app timezone; production passes the container's clock + config.
+ * @param season season-goal deps (spec 060). Optional for the same reason `workouts` is: omitting
+ *               them keeps the server strictly read-only over Garmin data.
+ * @param block training-block deps (spec 073) — the plan's memory. Same optionality rule.
+ * @param journal subjective-journal deps (spec 062) — how it FELT. Same optionality rule.
+ * @param activity activity-detail deps (spec 077) — what was INSIDE a session. Same optionality rule.
+ * @param analysis load/bests/time-trial deps (spec 079). Same optionality rule.
+ */
+export function createMcpServer(
+  garmin: GarminService,
+  ctx: ToolContext = DEFAULT_TOOL_CONTEXT,
+  workouts?: WorkoutToolDeps,
+  season?: SeasonToolDeps,
+  block?: BlockToolDeps,
+  journal?: JournalToolDeps,
+  activity?: ActivityToolDeps,
+  analysis?: AnalysisToolDeps
+): McpServer {
+  const server = new McpServer(
+    { name: 'openvitals', version: '0.1.0' },
+    {
+      instructions:
+        "Access to the user's own Garmin Connect data (sleep, steps, HRV, body battery, stress, resting " +
+        'heart rate, activities, SpO2, respiration, calories, body composition) — all READ-ONLY. Dates are ' +
+        'YYYY-MM-DD and default to today. Use get_metric_range for multi-day trends (max 31 days). For ' +
+        'interpreted, plain-language wellness insights use get_readiness (compact score) and get_insights ' +
+        '(readiness + trends + anomalies + correlations over a 7/30/90/365-day window), or the ' +
+        'interpret_health prompt to have the assistant narrate them. Insights are consumer wellness ' +
+        'signals, not medical advice.' +
+        (workouts
+          ? ' The create_workout / update_workout / delete_workout tools WRITE: they store a structured ' +
+            "training session locally and the next sync puts it in the user's Garmin calendar (and so on " +
+            'their watch). list_workouts shows those sessions and whether they have reached Garmin yet. ' +
+            'Nothing else on the Garmin account is ever modified.'
+          : '') +
+        (season
+          ? ' list_goals / get_goal_plan say what the training is FOR: the races and fitness targets ' +
+            'ahead, how far away each is, which phase of the block today falls in, and whether the ' +
+            'current trajectory reaches the target. Consult them before advising on any session — the ' +
+            'same workout is a good idea in base and a bad one in taper. A goal reported as `at-risk` ' +
+            'means the athlete is already building faster than is safe; never advise adding load there, ' +
+            'even when they are also behind target. create_goal / delete_goal manage that list.'
+          : '') +
+        (block
+          ? ' get_current_week is the FIRST call for any training question — it says which week of ' +
+            "which block today is, what that week's volume target and focus are against what has " +
+            'actually been run, which sessions are already scheduled, the pace bands to prescribe ' +
+            'in, and the standing constraints (days per week, seasons off a sport, injury history) ' +
+            'that must not be re-asked every conversation. Without it you are re-deriving the plan ' +
+            'from raw activities and will get a different answer each time. create_training_block / ' +
+            'update_training_block / list_training_blocks maintain it; update_training_block is also ' +
+            'how paces are recalculated after a time trial. get_week_review reconciles one week — ' +
+            'any week, including one already over — session by session: what was done, shortened, ' +
+            'missed, or done without being planned.'
+          : '') +
+        (journal
+          ? ' log_note / get_notes hold what no device records: per-day soreness and mood, and ' +
+            'per-session RPE. RPE belongs to a SESSION and soreness to a DAY. A session that felt ' +
+            'much harder than the plan asked for is a reason to look at the whole week, not a datum ' +
+            'to file — it is the earliest warning available, and it arrives before any device ' +
+            'signal does. Read get_notes before judging a session by its heart rate.'
+          : '') +
+        (activity
+          ? ' get_activity_detail opens ONE session up: the lap splits, per-lap pace, heart rate, ' +
+            'cadence and stride length, plus the ambient temperature. Call it before judging any ' +
+            'named workout — an average pace cannot tell 5×800 from a steady run, and a hot day ' +
+            'explains a slow one. list_activities finds the id.'
+          : '') +
+        (analysis
+          ? ' get_load_series states fitness, fatigue, form and the acute-to-chronic ratio directly, ' +
+            'including the sharpest jump in the window. get_personal_bests reads the stored ' +
+            'leaderboard. mark_as_time_trial derives pace bands from a session — it PROPOSES by ' +
+            'default and only writes with apply: true, because those bands come from a formula ' +
+            "rather than a measurement and overwriting a coach's own numbers silently would be wrong."
+          : '')
+    }
+  );
+
+  for (const tool of GARMIN_TOOLS) {
+    // The SDK infers the callback arg type from inputSchema; our handlers take a
+    // hand-rolled ToolArgs, so the glue callback is cast to the SDK's expected type.
+    const callback = (async (args: Record<string, unknown>) =>
+      tool.handler(garmin, args as ToolArgs, ctx)) as never;
+    server.registerTool(tool.name, { description: tool.description, inputSchema: tool.inputShape }, callback);
+  }
+
+  // Write tools (spec 050) only exist when the caller supplied their deps — a store, an id source and
+  // the consent gate. Omitting them keeps the server strictly read-only, which is what every read-path
+  // test and the local read facade want.
+  if (workouts) {
+    for (const tool of WORKOUT_TOOLS) {
+      const callback = (async (args: Record<string, unknown>) => tool.handler(workouts, args ?? {})) as never;
+      server.registerTool(
+        tool.name,
+        { description: tool.description, inputSchema: tool.inputShape },
+        callback
+      );
+    }
+  }
+
+  // Season goals (spec 060) — read AND write, gated the same way and injected the same way.
+  if (season) {
+    for (const tool of SEASON_TOOLS) {
+      const callback = (async (args: Record<string, unknown>) => tool.handler(season, args ?? {})) as never;
+      server.registerTool(
+        tool.name,
+        { description: tool.description, inputSchema: tool.inputShape },
+        callback
+      );
+    }
+  }
+
+  // Training blocks (spec 073) — the plan's memory, gated and injected exactly like the two above.
+  if (block) {
+    for (const tool of BLOCK_TOOLS) {
+      const callback = (async (args: Record<string, unknown>) => tool.handler(block, args ?? {})) as never;
+      server.registerTool(
+        tool.name,
+        { description: tool.description, inputSchema: tool.inputShape },
+        callback
+      );
+    }
+  }
+
+  // Subjective journal (spec 062) — gated and injected exactly like the three above.
+  if (journal) {
+    for (const tool of JOURNAL_TOOLS) {
+      const callback = (async (args: Record<string, unknown>) => tool.handler(journal, args ?? {})) as never;
+      server.registerTool(
+        tool.name,
+        { description: tool.description, inputSchema: tool.inputShape },
+        callback
+      );
+    }
+  }
+
+  // Activity detail (spec 077) — read-only, gated and injected exactly like the others.
+  if (activity) {
+    for (const tool of ACTIVITY_TOOLS) {
+      const callback = (async (args: Record<string, unknown>) => tool.handler(activity, args ?? {})) as never;
+      server.registerTool(
+        tool.name,
+        { description: tool.description, inputSchema: tool.inputShape },
+        callback
+      );
+    }
+  }
+
+  // Load, bests and time trial (spec 079) — gated and injected exactly like the others.
+  if (analysis) {
+    for (const tool of ANALYSIS_TOOLS) {
+      const callback = (async (args: Record<string, unknown>) => tool.handler(analysis, args ?? {})) as never;
+      server.registerTool(
+        tool.name,
+        { description: tool.description, inputSchema: tool.inputShape },
+        callback
+      );
+    }
+  }
+
+  // Prompt: guide the client to call the insights tools and narrate a short, non-medical briefing.
+  server.registerPrompt(
+    'interpret_health',
+    {
+      description:
+        'Have the assistant call get_readiness/get_insights for a window and give a short, encouraging, ' +
+        'non-medical plain-language wellness briefing.',
+      argsSchema: { window: z.string().optional() }
+    },
+    ({ window }) => ({
+      messages: interpretHealthMessages(window)
+    })
+  );
+
+  return server;
+}

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>OpenVitals</title>
+    <!--
+      The nonce is REQUIRED, not decoration (spec 063). `kit.csp` sets `script-src 'self'` plus a
+      per-response nonce, and SvelteKit only hashes the bootstrap IT injects — so this hand-written
+      block was being blocked by our own CSP on every single page load. It had been silently dead
+      since the policy landed: the theme below never ran, and `data-theme` on <html> above was doing
+      the whole job, which is why nobody noticed until a second pre-paint script needed to work.
+      Nothing here may be prerendered while this placeholder is used; `mode: 'auto'` switches to
+      hashes for prerendered pages and the nonce would then be stale.
+    -->
+    <script nonce="%sveltekit.nonce%">
+      // Apply saved/system theme before paint to avoid flash.
+      try {
+        const saved = localStorage.getItem('gb-theme');
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch {}
+      // Same, for the sidebar collapse state (spec 063). This one is a LAYOUT change: applied after
+      // hydration it would reflow the whole page width in front of the reader on every load. Key and
+      // values mirror `$lib/ui/sidebar-state`, which this script cannot import.
+      try {
+        const s = localStorage.getItem('gb-sidebar');
+        if (s === 'icons' || s === 'hidden') document.documentElement.dataset.sidebar = s;
+      } catch {}
+    </script>
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>

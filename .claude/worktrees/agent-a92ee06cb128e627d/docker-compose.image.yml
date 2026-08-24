@@ -1,0 +1,88 @@
+# OpenVitals — IMAGE-BASED production stack (source baked in via `build:`).
+#
+# The default stack is now docker-compose.yml (live-code / bind-mounted), because deploying with
+# this file requires rebuilding the images on every change. Keep using this one when you want an
+# immutable, prebuilt artifact (e.g. a registry-based deploy or a reproducible release):
+#
+#   docker compose -f docker-compose.image.yml up -d --build
+#
+# Only `web` publishes a port to the LAN. `garmin` (the sidecar) has NO published port,
+# so it is reachable only from `web` over the internal compose network (AGENTS.md §2 rule 2).
+
+services:
+  web:
+    build: ./apps/web
+    restart: unless-stopped
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      # Behind a TLS-terminating reverse proxy: trust these so SvelteKit sees the real https origin
+      # (correct redirect URIs + Secure cookies). Point your proxy's forwarded headers here.
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?set PUBLIC_BASE_URL in .env}
+      GARMIN_SIDECAR_URL: http://garmin:8081
+      # Multi-user (spec 012): Postgres + Google OIDC. Sessions are DB-backed opaque ids (no
+      # signing secret) and MCP is gated by per-user DB tokens (no static MCP_TOKEN).
+      DATABASE_URL: postgres://${POSTGRES_USER:-garmin}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-garmin_bridge}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set GOOGLE_CLIENT_ID in .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set GOOGLE_CLIENT_SECRET in .env}
+      AUTH_ADAPTER: ${AUTH_ADAPTER:-oidc}
+      # Zone "today" resolves in and timestamps render with (spec 018).
+      APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Warsaw}
+      # Background sync cadence in minutes; each tick fast-returns when nothing changed (spec 027).
+      SYNC_INTERVAL_MINUTES: ${SYNC_INTERVAL_MINUTES:-30}
+      # May the sync WRITE locally authored workouts to Garmin (spec 050)? `off` by default: it is the
+      # only code that mutates the Garmin account, and the endpoints are unverified. Turn on only after
+      # scripts/verify-workout-push.sh passes for a real account.
+    depends_on:
+      - garmin
+      - db
+    networks:
+      - bridge
+    volumes:
+      - web-data:/data
+    mem_limit: 256m
+    # cpus: 0.75  # Disabled: Synology's kernel lacks CPU CFS bandwidth control,
+    # so Docker rejects NanoCPUs ("kernel does not support CPU CFS scheduler").
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    # No published port — internal to the compose network only.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-garmin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-garmin_bridge}
+    networks:
+      - bridge
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    mem_limit: 256m
+
+  garmin:
+    build: ./services/garmin
+    restart: unless-stopped
+    # No `ports:` — intentionally NOT exposed to the host/LAN.
+    expose:
+      - '8081'
+    environment:
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:?set TOKEN_ENCRYPTION_KEY in .env}
+      # Per-user Fernet-encrypted tokens live in Postgres (owned by the sidecar); no disk volume.
+      DATABASE_URL: postgres://${POSTGRES_USER:-garmin}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-garmin_bridge}
+    depends_on:
+      - db
+    networks:
+      - bridge
+    mem_limit: 256m
+    # cpus: 0.75  # Disabled: Synology's kernel lacks CPU CFS bandwidth control,
+    # so Docker rejects NanoCPUs ("kernel does not support CPU CFS scheduler").
+
+networks:
+  bridge:
+    driver: bridge
+
+volumes:
+  web-data:
+  db-data:

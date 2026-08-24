@@ -1,0 +1,9 @@
+.svelte-kit
+build
+build-mcp
+node_modules
+.pnpm-store
+coverage
+pnpm-lock.yaml
+# local tooling cache (git-excluded, machine-generated) — never format-check it
+.impeccable

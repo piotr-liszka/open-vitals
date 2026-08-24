@@ -1,0 +1,82 @@
+/* Global base — reset + element defaults built on tokens. Import once in the root layout. */
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  transition:
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: var(--leading-tight);
+  font-weight: var(--font-semibold);
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+h2 {
+  font-size: var(--text-xl);
+}
+h3 {
+  font-size: var(--text-lg);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}

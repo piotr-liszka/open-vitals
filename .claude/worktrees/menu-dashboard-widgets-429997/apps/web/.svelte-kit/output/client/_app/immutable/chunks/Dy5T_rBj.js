@@ -1,0 +1,1 @@
+import{f as n,m as o,d as r}from"./gIaL7xAg.js";function u(t){return t.bucket==="month"?"month":"week"}function m(t){switch(t){case"week":return"tydzień";case"month":return"miesiąc";default:return"dzień"}}function s(t,e){return e==="month"?n(o(t),"shortYear"):r(t,"dayMonth")}export{m as a,s as b,u as v};

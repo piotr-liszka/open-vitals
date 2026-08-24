@@ -1,0 +1,1 @@
+const e=[{href:"/activities",label:"Lista"},{href:"/activities/mapa",label:"Mapa"}];function c(t){const i=e.find(a=>a.href===t);return i&&i.href!=="/activities"?`Aktywności · ${i.label}`:"Aktywności"}export{e as A,c as a};

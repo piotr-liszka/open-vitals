@@ -1,0 +1,43 @@
+# secrets / runtime
+.env
+.env.*
+!.env.example
+*.pem
+token-store/
+# Encrypted-token blobs. A Fernet ciphertext of live Garmin tokens was committed once
+# (services/garmin/tokens.enc, spec 055) — never again. Tokens live in Postgres now.
+*.enc
+# root-level runtime data only — anchored so it doesn't swallow source dirs named `data`
+# (e.g. src/routes/data, src/routes/api/data).
+/data/
+
+# node
+node_modules/
+apps/web/.pnpm-store/
+apps/web/.svelte-kit/
+apps/web/build/
+apps/web/build-mcp/
+apps/web/.vite/
+*.tsbuildinfo
+npm-debug.log*
+# test-coverage output only — anchored so it doesn't swallow source dirs named `coverage`
+# (e.g. src/routes/api/data/coverage).
+/coverage/
+apps/web/coverage/
+
+# python
+services/garmin/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# os / editor
+.DS_Store
+*.local
+.idea/
+.vscode/
+
+# editor swap files
+*.swp
+*.swo

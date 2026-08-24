@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "var(--lane)",
+        "files": [
+          "apps/web/src/modules/season/GoalCard.svelte"
+        ],
+        "createdAt": "2026-08-19T17:55:22.088Z",
+        "reason": "pre-existing pattern (spec 060), not authored in this session — this app uses --lane-* tokens as the consistent sport/goal color-coding accent across cards, badges and charts app-wide; a 3px border-left keyed to that token is this app's established accent idiom, not a generic AI-slop tell"
+      }
+    ]
+  }
+}

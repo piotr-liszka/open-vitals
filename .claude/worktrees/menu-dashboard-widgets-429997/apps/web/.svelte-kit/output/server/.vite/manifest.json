@@ -1,0 +1,2056 @@
+{
+  ".svelte-kit/generated/server/internal.js": {
+    "file": "internal.js",
+    "name": "internal",
+    "src": ".svelte-kit/generated/server/internal.js",
+    "isEntry": true,
+    "imports": [
+      "_root.js",
+      "_server.js",
+      "_internal.js"
+    ]
+  },
+  "_AppShell.js": {
+    "file": "chunks/AppShell.js",
+    "name": "AppShell",
+    "imports": [
+      "_index.js",
+      "_Icon.js",
+      "_Button.js",
+      "_ThemeToggle.js",
+      "_client.js",
+      "_index2.js",
+      "_SegmentedControl.js",
+      "_range.js",
+      "_stores.js",
+      "_date.js"
+    ],
+    "css": [
+      "_app/immutable/assets/AppShell.DiXQWGBj.css"
+    ]
+  },
+  "_AppShell.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/AppShell.DiXQWGBj.css",
+    "src": "_AppShell.svelte_svelte_type_style_lang.js"
+  },
+  "_Badge.js": {
+    "file": "chunks/Badge.js",
+    "name": "Badge",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/Badge.C9ADkSY6.css"
+    ]
+  },
+  "_Badge.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/Badge.C9ADkSY6.css",
+    "src": "_Badge.svelte_svelte_type_style_lang.js"
+  },
+  "_Banner.js": {
+    "file": "chunks/Banner.js",
+    "name": "Banner",
+    "imports": [
+      "_index.js",
+      "_toast.js"
+    ]
+  },
+  "_BarChart.js": {
+    "file": "chunks/BarChart.js",
+    "name": "BarChart",
+    "imports": [
+      "_index.js",
+      "_TrendChart.js"
+    ],
+    "css": [
+      "_app/immutable/assets/BarChart.qMmqKHN1.css"
+    ]
+  },
+  "_BarChart.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/BarChart.qMmqKHN1.css",
+    "src": "_BarChart.svelte_svelte_type_style_lang.js"
+  },
+  "_Button.js": {
+    "file": "chunks/Button.js",
+    "name": "Button",
+    "imports": [
+      "_index.js",
+      "_toast.js"
+    ]
+  },
+  "_Card.js": {
+    "file": "chunks/Card.js",
+    "name": "Card",
+    "imports": [
+      "_index.js",
+      "_RangeBadge.js"
+    ],
+    "css": [
+      "_app/immutable/assets/Card.CXE_nlgE.css"
+    ]
+  },
+  "_Card.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/Card.CXE_nlgE.css",
+    "src": "_Card.svelte_svelte_type_style_lang.js"
+  },
+  "_ConfirmDialog.js": {
+    "file": "chunks/ConfirmDialog.js",
+    "name": "ConfirmDialog",
+    "imports": [
+      "_index.js",
+      "_Button.js",
+      "_toast.js"
+    ]
+  },
+  "_ConsentPanel.js": {
+    "file": "chunks/ConsentPanel.js",
+    "name": "ConsentPanel",
+    "imports": [
+      "_index.js",
+      "_Button.js",
+      "_toast.js",
+      "_Badge.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_date.js"
+    ],
+    "css": [
+      "_app/immutable/assets/ConsentPanel.C2MHAdLe.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "_DeltaBadge.js": {
+    "file": "chunks/DeltaBadge.js",
+    "name": "DeltaBadge",
+    "imports": [
+      "_index.js",
+      "_Icon.js"
+    ],
+    "css": [
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "_DeltaBadge.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/DeltaBadge.BmQMXR2K.css",
+    "src": "_DeltaBadge.svelte_svelte_type_style_lang.js"
+  },
+  "_Field.js": {
+    "file": "chunks/Field.js",
+    "name": "Field",
+    "imports": [
+      "_index.js",
+      "_toast.js"
+    ]
+  },
+  "_FilterChips.js": {
+    "file": "chunks/FilterChips.js",
+    "name": "FilterChips",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css"
+    ]
+  },
+  "_FilterChips.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+    "src": "_FilterChips.svelte_svelte_type_style_lang.js"
+  },
+  "_Icon.js": {
+    "file": "chunks/Icon.js",
+    "name": "Icon",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/Card.CXE_nlgE.css"
+    ]
+  },
+  "_Input.js": {
+    "file": "chunks/Input.js",
+    "name": "Input",
+    "imports": [
+      "_index.js",
+      "_toast.js"
+    ]
+  },
+  "_LeafletMap.js": {
+    "file": "chunks/LeafletMap.js",
+    "name": "LeafletMap",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/LeafletMap.Bblj5xuy.css"
+    ]
+  },
+  "_ProgressBar.js": {
+    "file": "chunks/ProgressBar.js",
+    "name": "ProgressBar",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/ProgressBar.BdtpJj99.css"
+    ]
+  },
+  "_RadarChart.js": {
+    "file": "chunks/RadarChart.js",
+    "name": "RadarChart",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/RadarChart.D1frK0He.css"
+    ]
+  },
+  "_RadarChart.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/RadarChart.D1frK0He.css",
+    "src": "_RadarChart.svelte_svelte_type_style_lang.js"
+  },
+  "_RangeBadge.js": {
+    "file": "chunks/RangeBadge.js",
+    "name": "RangeBadge",
+    "imports": [
+      "_index.js",
+      "_Icon.js"
+    ],
+    "css": [
+      "_app/immutable/assets/Card.CXE_nlgE.css"
+    ]
+  },
+  "_RankMedal.js": {
+    "file": "chunks/RankMedal.js",
+    "name": "RankMedal",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "_ReadinessGauge.js": {
+    "file": "chunks/ReadinessGauge.js",
+    "name": "ReadinessGauge",
+    "imports": [
+      "_index.js",
+      "_toast.js",
+      "_Badge.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js"
+    ],
+    "css": [
+      "_app/immutable/assets/ReadinessGauge.CVylOEa1.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "_SegmentedControl.js": {
+    "file": "chunks/SegmentedControl.js",
+    "name": "SegmentedControl",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css"
+    ]
+  },
+  "_SegmentedControl.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+    "src": "_SegmentedControl.svelte_svelte_type_style_lang.js"
+  },
+  "_SetupForm.js": {
+    "file": "chunks/SetupForm.js",
+    "name": "SetupForm",
+    "imports": [
+      "_index.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_Button.js",
+      "_Input.js",
+      "_Field.js",
+      "_toast.js",
+      "_client2.js"
+    ],
+    "css": [
+      "_app/immutable/assets/SetupForm.BmpZI6jj.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "_Skeleton.js": {
+    "file": "chunks/Skeleton.js",
+    "name": "Skeleton",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/AppShell.DiXQWGBj.css"
+    ]
+  },
+  "_Sparkline.js": {
+    "file": "chunks/Sparkline.js",
+    "name": "Sparkline",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/AppShell.DiXQWGBj.css"
+    ]
+  },
+  "_StackedBar.js": {
+    "file": "chunks/StackedBar.js",
+    "name": "StackedBar",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/StackedBar.BBwLl61w.css"
+    ]
+  },
+  "_StackedBar.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/StackedBar.BBwLl61w.css",
+    "src": "_StackedBar.svelte_svelte_type_style_lang.js"
+  },
+  "_StatTile.js": {
+    "file": "chunks/StatTile.js",
+    "name": "StatTile",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/BarChart.qMmqKHN1.css"
+    ]
+  },
+  "_SubNav.js": {
+    "file": "chunks/SubNav.js",
+    "name": "SubNav",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/AppShell.DiXQWGBj.css"
+    ]
+  },
+  "_SyncFooter.js": {
+    "file": "chunks/SyncFooter.js",
+    "name": "SyncFooter",
+    "imports": [
+      "_index.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_AppShell.js",
+      "_date.js"
+    ],
+    "css": [
+      "_app/immutable/assets/SyncFooter.CLu1gBvn.css"
+    ]
+  },
+  "_Table.js": {
+    "file": "chunks/Table.js",
+    "name": "Table",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/Table.BDK44Tgb.css"
+    ]
+  },
+  "_Table.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/Table.BDK44Tgb.css",
+    "src": "_Table.svelte_svelte_type_style_lang.js"
+  },
+  "_ThemeToggle.js": {
+    "file": "chunks/ThemeToggle.js",
+    "name": "ThemeToggle",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/AppShell.DiXQWGBj.css"
+    ]
+  },
+  "_Toast2.js": {
+    "file": "chunks/Toast2.js",
+    "name": "Toast",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/AppShell.DiXQWGBj.css"
+    ]
+  },
+  "_Toggle.js": {
+    "file": "chunks/Toggle.js",
+    "name": "Toggle",
+    "imports": [
+      "_index.js",
+      "_Button.js"
+    ],
+    "css": [
+      "_app/immutable/assets/AppShell.DiXQWGBj.css"
+    ]
+  },
+  "_TrendChart.js": {
+    "file": "chunks/TrendChart.js",
+    "name": "TrendChart",
+    "imports": [
+      "_index.js"
+    ],
+    "css": [
+      "_app/immutable/assets/TrendChart._LOsMDiB.css"
+    ]
+  },
+  "_TrendChart.svelte_svelte_type_style_lang.js": {
+    "file": "_app/immutable/assets/TrendChart._LOsMDiB.css",
+    "src": "_TrendChart.svelte_svelte_type_style_lang.js"
+  },
+  "_activities-nav.js": {
+    "file": "chunks/activities-nav.js",
+    "name": "activities-nav"
+  },
+  "_activity-charts.js": {
+    "file": "chunks/activity-charts.js",
+    "name": "activity-charts",
+    "imports": [
+      "_efficiency.js",
+      "_pace-model.js",
+      "_stream-axes.js"
+    ]
+  },
+  "_activity-power.js": {
+    "file": "chunks/activity-power.js",
+    "name": "activity-power"
+  },
+  "_auth.api.js": {
+    "file": "chunks/auth.api.js",
+    "name": "auth.api",
+    "imports": [
+      "_crypto.js",
+      "_pkce.js",
+      "_types2.js"
+    ]
+  },
+  "_best-efforts.js": {
+    "file": "chunks/best-efforts.js",
+    "name": "best-efforts"
+  },
+  "_client.js": {
+    "file": "chunks/client.js",
+    "name": "client",
+    "imports": [
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_index.js"
+    ]
+  },
+  "_client2.js": {
+    "file": "chunks/client2.js",
+    "name": "client",
+    "imports": [
+      "_client.js"
+    ]
+  },
+  "_condition.format.js": {
+    "file": "chunks/condition.format.js",
+    "name": "condition.format"
+  },
+  "_consent.api.js": {
+    "file": "chunks/consent.api.js",
+    "name": "consent.api",
+    "imports": [
+      "_types.js"
+    ]
+  },
+  "_crypto.js": {
+    "file": "chunks/crypto.js",
+    "name": "crypto"
+  },
+  "_dashboard-nav.js": {
+    "file": "chunks/dashboard-nav.js",
+    "name": "dashboard-nav"
+  },
+  "_dashboard.format.js": {
+    "file": "chunks/dashboard.format.js",
+    "name": "dashboard.format"
+  },
+  "_dashboards.api.js": {
+    "file": "chunks/dashboards.api.js",
+    "name": "dashboards.api",
+    "imports": [
+      "_dashboards.types.js"
+    ]
+  },
+  "_dashboards.types.js": {
+    "file": "chunks/dashboards.types.js",
+    "name": "dashboards.types"
+  },
+  "_date.js": {
+    "file": "chunks/date.js",
+    "name": "date"
+  },
+  "_efficiency.js": {
+    "file": "chunks/efficiency.js",
+    "name": "efficiency"
+  },
+  "_exports.js": {
+    "file": "chunks/exports.js",
+    "name": "exports",
+    "imports": [
+      "_index.js"
+    ]
+  },
+  "_health.api.js": {
+    "file": "chunks/health.api.js",
+    "name": "health.api",
+    "imports": [
+      "_interfaces.js"
+    ]
+  },
+  "_index.js": {
+    "file": "chunks/index.js",
+    "name": "index",
+    "imports": [
+      "_uneval.js"
+    ]
+  },
+  "_index2.js": {
+    "file": "chunks/index2.js",
+    "name": "index",
+    "imports": [
+      "_client2.js",
+      "_index.js"
+    ]
+  },
+  "_index3.js": {
+    "file": "chunks/index3.js",
+    "name": "index",
+    "imports": [
+      "_crypto.js",
+      "_pkce.js"
+    ]
+  },
+  "_insights.api.js": {
+    "file": "chunks/insights.api.js",
+    "name": "insights.api",
+    "imports": [
+      "_date.js",
+      "_series.js",
+      "_interfaces.js",
+      "_metric-specs.js",
+      "_condition.format.js"
+    ]
+  },
+  "_interfaces.js": {
+    "file": "chunks/interfaces.js",
+    "name": "interfaces"
+  },
+  "_internal.js": {
+    "file": "chunks/internal.js",
+    "name": "internal",
+    "imports": [
+      "_root.js",
+      "_server.js"
+    ],
+    "dynamicImports": [
+      "src/hooks.server.ts"
+    ]
+  },
+  "_load-risk.js": {
+    "file": "chunks/load-risk.js",
+    "name": "load-risk"
+  },
+  "_mcpUrl.api.js": {
+    "file": "chunks/mcpUrl.api.js",
+    "name": "mcpUrl.api"
+  },
+  "_metric-labels.js": {
+    "file": "chunks/metric-labels.js",
+    "name": "metric-labels"
+  },
+  "_metric-specs.js": {
+    "file": "chunks/metric-specs.js",
+    "name": "metric-specs"
+  },
+  "_pace-model.js": {
+    "file": "chunks/pace-model.js",
+    "name": "pace-model"
+  },
+  "_pkce.js": {
+    "file": "chunks/pkce.js",
+    "name": "pkce",
+    "imports": [
+      "_crypto.js"
+    ]
+  },
+  "_planner.js": {
+    "file": "chunks/planner.js",
+    "name": "planner",
+    "imports": [
+      "_date.js"
+    ]
+  },
+  "_power-profile.js": {
+    "file": "chunks/power-profile.js",
+    "name": "power-profile"
+  },
+  "_race-predictor.js": {
+    "file": "chunks/race-predictor.js",
+    "name": "race-predictor"
+  },
+  "_range-context.js": {
+    "file": "chunks/range-context.js",
+    "name": "range-context",
+    "imports": [
+      "_date.js",
+      "_range.js"
+    ]
+  },
+  "_range.js": {
+    "file": "chunks/range.js",
+    "name": "range",
+    "imports": [
+      "_date.js"
+    ]
+  },
+  "_registry.js": {
+    "file": "chunks/registry.js",
+    "name": "registry"
+  },
+  "_root.js": {
+    "file": "chunks/root.js",
+    "name": "root",
+    "imports": [
+      "_index.js"
+    ]
+  },
+  "_running-profile.js": {
+    "file": "chunks/running-profile.js",
+    "name": "running-profile",
+    "imports": [
+      "_weekly-volume.js"
+    ]
+  },
+  "_season.api.js": {
+    "file": "chunks/season.api.js",
+    "name": "season.api",
+    "imports": [
+      "_types3.js",
+      "_training-load.js",
+      "_power-profile.js",
+      "_load-risk.js",
+      "_running-profile.js",
+      "_pace-model.js",
+      "_race-predictor.js",
+      "_date.js",
+      "_sport-labels.js",
+      "_tier.js"
+    ]
+  },
+  "_series.js": {
+    "file": "chunks/series.js",
+    "name": "series",
+    "imports": [
+      "_date.js"
+    ]
+  },
+  "_server.js": {
+    "file": "chunks/server.js",
+    "name": "server"
+  },
+  "_sport-labels.js": {
+    "file": "chunks/sport-labels.js",
+    "name": "sport-labels"
+  },
+  "_stores.js": {
+    "file": "chunks/stores.js",
+    "name": "stores",
+    "imports": [
+      "_index.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js"
+    ]
+  },
+  "_streak.js": {
+    "file": "chunks/streak.js",
+    "name": "streak",
+    "imports": [
+      "_date.js"
+    ]
+  },
+  "_stream-axes.js": {
+    "file": "chunks/stream-axes.js",
+    "name": "stream-axes"
+  },
+  "_sync.api.js": {
+    "file": "chunks/sync.api.js",
+    "name": "sync.api",
+    "imports": [
+      "_interfaces.js"
+    ]
+  },
+  "_tier.js": {
+    "file": "chunks/tier.js",
+    "name": "tier"
+  },
+  "_toast.js": {
+    "file": "chunks/toast.js",
+    "name": "toast",
+    "imports": [
+      "_exports.js"
+    ],
+    "css": [
+      "_app/immutable/assets/toast.PsmvzXhb.css"
+    ]
+  },
+  "_training-load.js": {
+    "file": "chunks/training-load.js",
+    "name": "training-load"
+  },
+  "_training-nav.js": {
+    "file": "chunks/training-nav.js",
+    "name": "training-nav",
+    "imports": [
+      "_sport-labels.js"
+    ]
+  },
+  "_types.js": {
+    "file": "chunks/types.js",
+    "name": "types"
+  },
+  "_types2.js": {
+    "file": "chunks/types2.js",
+    "name": "types"
+  },
+  "_types3.js": {
+    "file": "chunks/types3.js",
+    "name": "types"
+  },
+  "_uneval.js": {
+    "file": "chunks/uneval.js",
+    "name": "uneval"
+  },
+  "_utils.js": {
+    "file": "chunks/utils.js",
+    "name": "utils",
+    "imports": [
+      "_utils2.js",
+      "_uneval.js"
+    ]
+  },
+  "_utils2.js": {
+    "file": "chunks/utils2.js",
+    "name": "utils"
+  },
+  "_weekly-volume.js": {
+    "file": "chunks/weekly-volume.js",
+    "name": "weekly-volume",
+    "imports": [
+      "_date.js"
+    ]
+  },
+  "_workouts.api.js": {
+    "file": "chunks/workouts.api.js",
+    "name": "workouts.api",
+    "imports": [
+      "_registry.js",
+      "_workouts.js",
+      "_date.js"
+    ]
+  },
+  "_workouts.js": {
+    "file": "chunks/workouts.js",
+    "name": "workouts",
+    "imports": [
+      "_sport-labels.js"
+    ]
+  },
+  "node_modules/.pnpm/@sveltejs+kit@2.70.2_@sveltejs+vite-plugin-svelte@4.0.4_svelte@5.56.8_vite@5.4.21_@types+node_o3ekahsndvl2k2tiyhmdgapo7q/node_modules/@sveltejs/kit/src/runtime/app/server/remote/index.js": {
+    "file": "remote-entry.js",
+    "name": "remote-entry",
+    "src": "node_modules/.pnpm/@sveltejs+kit@2.70.2_@sveltejs+vite-plugin-svelte@4.0.4_svelte@5.56.8_vite@5.4.21_@types+node_o3ekahsndvl2k2tiyhmdgapo7q/node_modules/@sveltejs/kit/src/runtime/app/server/remote/index.js",
+    "isEntry": true,
+    "imports": [
+      "_utils.js",
+      "_server.js"
+    ]
+  },
+  "node_modules/.pnpm/@sveltejs+kit@2.70.2_@sveltejs+vite-plugin-svelte@4.0.4_svelte@5.56.8_vite@5.4.21_@types+node_o3ekahsndvl2k2tiyhmdgapo7q/node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte": {
+    "file": "entries/fallbacks/error.svelte.js",
+    "name": "entries/fallbacks/error.svelte",
+    "src": "node_modules/.pnpm/@sveltejs+kit@2.70.2_@sveltejs+vite-plugin-svelte@4.0.4_svelte@5.56.8_vite@5.4.21_@types+node_o3ekahsndvl2k2tiyhmdgapo7q/node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_index2.js"
+    ]
+  },
+  "node_modules/.pnpm/@sveltejs+kit@2.70.2_@sveltejs+vite-plugin-svelte@4.0.4_svelte@5.56.8_vite@5.4.21_@types+node_o3ekahsndvl2k2tiyhmdgapo7q/node_modules/@sveltejs/kit/src/runtime/server/index.js": {
+    "file": "index.js",
+    "name": "index",
+    "src": "node_modules/.pnpm/@sveltejs+kit@2.70.2_@sveltejs+vite-plugin-svelte@4.0.4_svelte@5.56.8_vite@5.4.21_@types+node_o3ekahsndvl2k2tiyhmdgapo7q/node_modules/@sveltejs/kit/src/runtime/server/index.js",
+    "isEntry": true,
+    "imports": [
+      "_utils.js",
+      "_index.js",
+      "_server.js",
+      "_uneval.js",
+      "_exports.js",
+      "_utils2.js",
+      "_internal.js"
+    ]
+  },
+  "src/hooks.server.ts": {
+    "file": "entries/hooks.server.js",
+    "name": "entries/hooks.server",
+    "src": "src/hooks.server.ts",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_date.js",
+      "_crypto.js",
+      "_interfaces.js",
+      "_registry.js",
+      "_types.js",
+      "_types2.js",
+      "_sport-labels.js",
+      "_types3.js",
+      "_metric-specs.js",
+      "_best-efforts.js",
+      "_stream-axes.js"
+    ]
+  },
+  "src/routes/+layout.server.ts": {
+    "file": "entries/pages/_layout.server.ts.js",
+    "name": "entries/pages/_layout.server.ts",
+    "src": "src/routes/+layout.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_dashboards.api.js",
+      "_dashboard-nav.js"
+    ]
+  },
+  "src/routes/+layout.svelte": {
+    "file": "entries/pages/_layout.svelte.js",
+    "name": "entries/pages/_layout.svelte",
+    "src": "src/routes/+layout.svelte",
+    "isEntry": true,
+    "imports": [
+      "_toast.js",
+      "_index.js",
+      "_Toast2.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_layout.C-o0Q2yB.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/+page.server.ts": {
+    "file": "entries/pages/_page.server.ts.js",
+    "name": "entries/pages/_page.server.ts",
+    "src": "src/routes/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_health.api.js",
+      "_date.js",
+      "_range.js",
+      "_series.js",
+      "_interfaces.js",
+      "_metric-specs.js",
+      "_dashboard.format.js",
+      "_consent.api.js",
+      "_insights.api.js",
+      "_workouts.js",
+      "_sport-labels.js",
+      "_running-profile.js",
+      "_range-context.js",
+      "_tier.js"
+    ]
+  },
+  "src/routes/+page.svelte": {
+    "file": "entries/pages/_page.svelte.js",
+    "name": "entries/pages/_page.svelte",
+    "src": "src/routes/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_client.js",
+      "_toast.js",
+      "_Banner.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_Card.js",
+      "_StatTile.js",
+      "_TrendChart.js",
+      "_RangeBadge.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_date.js",
+      "_series.js",
+      "_ConsentPanel.js",
+      "_dashboard.format.js",
+      "_Badge.js",
+      "_SegmentedControl.js",
+      "_Skeleton.js",
+      "_Icon.js",
+      "_StackedBar.js",
+      "_ReadinessGauge.js",
+      "_condition.format.js",
+      "_Button.js",
+      "_SetupForm.js",
+      "_Sparkline.js",
+      "_ThemeToggle.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.CcoOCWMH.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/activities/+page.server.ts": {
+    "file": "entries/pages/activities/_page.server.ts.js",
+    "name": "entries/pages/activities/_page.server.ts",
+    "src": "src/routes/activities/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_range-context.js"
+    ]
+  },
+  "src/routes/activities/+page.svelte": {
+    "file": "entries/pages/activities/_page.svelte.js",
+    "name": "entries/pages/activities/_page.svelte",
+    "src": "src/routes/activities/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_stores.js",
+      "_toast.js",
+      "_SubNav.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_Input.js",
+      "_Button.js",
+      "_SegmentedControl.js",
+      "_FilterChips.js",
+      "_RangeBadge.js",
+      "_range.js",
+      "_sport-labels.js",
+      "_LeafletMap.js",
+      "_Badge.js",
+      "_date.js",
+      "_activities-nav.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.K7j7aQXN.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/activities/[id]/+page.server.ts": {
+    "file": "entries/pages/activities/_id_/_page.server.ts.js",
+    "name": "entries/pages/activities/_id_/_page.server.ts",
+    "src": "src/routes/activities/[id]/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_activity-power.js",
+      "_date.js",
+      "_sport-labels.js",
+      "_training-load.js",
+      "_activity-charts.js",
+      "_efficiency.js",
+      "_best-efforts.js",
+      "_pace-model.js",
+      "_stream-axes.js"
+    ]
+  },
+  "src/routes/activities/[id]/+page.svelte": {
+    "file": "entries/pages/activities/_id_/_page.svelte.js",
+    "name": "entries/pages/activities/_id_/_page.svelte",
+    "src": "src/routes/activities/[id]/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_toast.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_LeafletMap.js",
+      "_StatTile.js",
+      "_Card.js",
+      "_Badge.js",
+      "_sport-labels.js",
+      "_date.js",
+      "_activity-charts.js",
+      "_efficiency.js",
+      "_SegmentedControl.js",
+      "_DeltaBadge.js",
+      "_TrendChart.js",
+      "_Table.js",
+      "_StackedBar.js",
+      "_stream-axes.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.RKFZzOVf.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/activities/mapa/+page.server.ts": {
+    "file": "entries/pages/activities/mapa/_page.server.ts.js",
+    "name": "entries/pages/activities/mapa/_page.server.ts",
+    "src": "src/routes/activities/mapa/+page.server.ts",
+    "isEntry": true
+  },
+  "src/routes/activities/mapa/+page.svelte": {
+    "file": "entries/pages/activities/mapa/_page.svelte.js",
+    "name": "entries/pages/activities/mapa/_page.svelte",
+    "src": "src/routes/activities/mapa/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_stores.js",
+      "_toast.js",
+      "_SubNav.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_LeafletMap.js",
+      "_StatTile.js",
+      "_FilterChips.js",
+      "_sport-labels.js",
+      "_activities-nav.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.DPIryG6p.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/analytics/+server.ts": {
+    "file": "entries/endpoints/analytics/_server.ts.js",
+    "name": "entries/endpoints/analytics/_server.ts",
+    "src": "src/routes/analytics/+server.ts",
+    "isEntry": true
+  },
+  "src/routes/api/consent/+server.ts": {
+    "file": "entries/endpoints/api/consent/_server.ts.js",
+    "name": "entries/endpoints/api/consent/_server.ts",
+    "src": "src/routes/api/consent/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_consent.api.js"
+    ]
+  },
+  "src/routes/api/dashboards/+server.ts": {
+    "file": "entries/endpoints/api/dashboards/_server.ts.js",
+    "name": "entries/endpoints/api/dashboards/_server.ts",
+    "src": "src/routes/api/dashboards/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_dashboards.api.js"
+    ]
+  },
+  "src/routes/api/data/coverage/+server.ts": {
+    "file": "entries/endpoints/api/data/coverage/_server.ts.js",
+    "name": "entries/endpoints/api/data/coverage/_server.ts",
+    "src": "src/routes/api/data/coverage/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_sync.api.js"
+    ]
+  },
+  "src/routes/api/garmin/disconnect/+server.ts": {
+    "file": "entries/endpoints/api/garmin/disconnect/_server.ts.js",
+    "name": "entries/endpoints/api/garmin/disconnect/_server.ts",
+    "src": "src/routes/api/garmin/disconnect/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_interfaces.js"
+    ]
+  },
+  "src/routes/api/garmin/setup/+server.ts": {
+    "file": "entries/endpoints/api/garmin/setup/_server.ts.js",
+    "name": "entries/endpoints/api/garmin/setup/_server.ts",
+    "src": "src/routes/api/garmin/setup/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_interfaces.js"
+    ]
+  },
+  "src/routes/api/garmin/status/+server.ts": {
+    "file": "entries/endpoints/api/garmin/status/_server.ts.js",
+    "name": "entries/endpoints/api/garmin/status/_server.ts",
+    "src": "src/routes/api/garmin/status/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_health.api.js"
+    ]
+  },
+  "src/routes/api/health/+server.ts": {
+    "file": "entries/endpoints/api/health/_server.ts.js",
+    "name": "entries/endpoints/api/health/_server.ts",
+    "src": "src/routes/api/health/+server.ts",
+    "isEntry": true
+  },
+  "src/routes/api/insights/+server.ts": {
+    "file": "entries/endpoints/api/insights/_server.ts.js",
+    "name": "entries/endpoints/api/insights/_server.ts",
+    "src": "src/routes/api/insights/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_insights.api.js"
+    ]
+  },
+  "src/routes/api/integrations/[provider]/callback/+server.ts": {
+    "file": "entries/endpoints/api/integrations/_provider_/callback/_server.ts.js",
+    "name": "entries/endpoints/api/integrations/_provider_/callback/_server.ts",
+    "src": "src/routes/api/integrations/[provider]/callback/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/integrations/[provider]/connect/+server.ts": {
+    "file": "entries/endpoints/api/integrations/_provider_/connect/_server.ts.js",
+    "name": "entries/endpoints/api/integrations/_provider_/connect/_server.ts",
+    "src": "src/routes/api/integrations/[provider]/connect/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/integrations/[provider]/disconnect/+server.ts": {
+    "file": "entries/endpoints/api/integrations/_provider_/disconnect/_server.ts.js",
+    "name": "entries/endpoints/api/integrations/_provider_/disconnect/_server.ts",
+    "src": "src/routes/api/integrations/[provider]/disconnect/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/integrations/[provider]/sync/+server.ts": {
+    "file": "entries/endpoints/api/integrations/_provider_/sync/_server.ts.js",
+    "name": "entries/endpoints/api/integrations/_provider_/sync/_server.ts",
+    "src": "src/routes/api/integrations/[provider]/sync/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/mcp-url/+server.ts": {
+    "file": "entries/endpoints/api/mcp-url/_server.ts.js",
+    "name": "entries/endpoints/api/mcp-url/_server.ts",
+    "src": "src/routes/api/mcp-url/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_mcpUrl.api.js"
+    ]
+  },
+  "src/routes/api/season/goals/+server.ts": {
+    "file": "entries/endpoints/api/season/goals/_server.ts.js",
+    "name": "entries/endpoints/api/season/goals/_server.ts",
+    "src": "src/routes/api/season/goals/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_season.api.js"
+    ]
+  },
+  "src/routes/api/season/goals/[id]/+server.ts": {
+    "file": "entries/endpoints/api/season/goals/_id_/_server.ts.js",
+    "name": "entries/endpoints/api/season/goals/_id_/_server.ts",
+    "src": "src/routes/api/season/goals/[id]/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_season.api.js"
+    ]
+  },
+  "src/routes/api/settings/mcp-token/rotate/+server.ts": {
+    "file": "entries/endpoints/api/settings/mcp-token/rotate/_server.ts.js",
+    "name": "entries/endpoints/api/settings/mcp-token/rotate/_server.ts",
+    "src": "src/routes/api/settings/mcp-token/rotate/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_mcpUrl.api.js"
+    ]
+  },
+  "src/routes/api/sync/+server.ts": {
+    "file": "entries/endpoints/api/sync/_server.ts.js",
+    "name": "entries/endpoints/api/sync/_server.ts",
+    "src": "src/routes/api/sync/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_sync.api.js"
+    ]
+  },
+  "src/routes/api/sync/diagnostics/+server.ts": {
+    "file": "entries/endpoints/api/sync/diagnostics/_server.ts.js",
+    "name": "entries/endpoints/api/sync/diagnostics/_server.ts",
+    "src": "src/routes/api/sync/diagnostics/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_sync.api.js"
+    ]
+  },
+  "src/routes/api/sync/status/+server.ts": {
+    "file": "entries/endpoints/api/sync/status/_server.ts.js",
+    "name": "entries/endpoints/api/sync/status/_server.ts",
+    "src": "src/routes/api/sync/status/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_sync.api.js"
+    ]
+  },
+  "src/routes/api/version/+server.ts": {
+    "file": "entries/endpoints/api/version/_server.ts.js",
+    "name": "entries/endpoints/api/version/_server.ts",
+    "src": "src/routes/api/version/+server.ts",
+    "isEntry": true
+  },
+  "src/routes/api/workout-templates/+server.ts": {
+    "file": "entries/endpoints/api/workout-templates/_server.ts.js",
+    "name": "entries/endpoints/api/workout-templates/_server.ts",
+    "src": "src/routes/api/workout-templates/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_workouts.api.js"
+    ]
+  },
+  "src/routes/api/workout-templates/[id]/+server.ts": {
+    "file": "entries/endpoints/api/workout-templates/_id_/_server.ts.js",
+    "name": "entries/endpoints/api/workout-templates/_id_/_server.ts",
+    "src": "src/routes/api/workout-templates/[id]/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_workouts.api.js"
+    ]
+  },
+  "src/routes/api/workouts/+server.ts": {
+    "file": "entries/endpoints/api/workouts/_server.ts.js",
+    "name": "entries/endpoints/api/workouts/_server.ts",
+    "src": "src/routes/api/workouts/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_workouts.api.js"
+    ]
+  },
+  "src/routes/api/workouts/[id]/+server.ts": {
+    "file": "entries/endpoints/api/workouts/_id_/_server.ts.js",
+    "name": "entries/endpoints/api/workouts/_id_/_server.ts",
+    "src": "src/routes/api/workouts/[id]/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_workouts.api.js"
+    ]
+  },
+  "src/routes/auth/callback/+server.ts": {
+    "file": "entries/endpoints/auth/callback/_server.ts.js",
+    "name": "entries/endpoints/auth/callback/_server.ts",
+    "src": "src/routes/auth/callback/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_auth.api.js"
+    ]
+  },
+  "src/routes/auth/login/+server.ts": {
+    "file": "entries/endpoints/auth/login/_server.ts.js",
+    "name": "entries/endpoints/auth/login/_server.ts",
+    "src": "src/routes/auth/login/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_auth.api.js"
+    ]
+  },
+  "src/routes/auth/logout/+server.ts": {
+    "file": "entries/endpoints/auth/logout/_server.ts.js",
+    "name": "entries/endpoints/auth/logout/_server.ts",
+    "src": "src/routes/auth/logout/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_auth.api.js"
+    ]
+  },
+  "src/routes/dashboard/+server.ts": {
+    "file": "entries/endpoints/dashboard/_server.ts.js",
+    "name": "entries/endpoints/dashboard/_server.ts",
+    "src": "src/routes/dashboard/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_dashboards.api.js",
+      "_dashboard-nav.js"
+    ]
+  },
+  "src/routes/dashboard/[id]/+page.server.ts": {
+    "file": "entries/pages/dashboard/_id_/_page.server.ts.js",
+    "name": "entries/pages/dashboard/_id_/_page.server.ts",
+    "src": "src/routes/dashboard/[id]/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_dashboards.api.js",
+      "_date.js",
+      "_metric-specs.js",
+      "_range.js",
+      "_series.js",
+      "_streak.js",
+      "_range-context.js"
+    ]
+  },
+  "src/routes/dashboard/[id]/+page.svelte": {
+    "file": "entries/pages/dashboard/_id_/_page.svelte.js",
+    "name": "entries/pages/dashboard/_id_/_page.svelte",
+    "src": "src/routes/dashboard/[id]/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_toast.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_Button.js",
+      "_Card.js",
+      "_RangeBadge.js",
+      "_ConfirmDialog.js",
+      "_series.js",
+      "_sport-labels.js",
+      "_metric-labels.js",
+      "_dashboard-nav.js",
+      "_dashboards.types.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.ZeARD84c.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/dashboard/new/+page.server.ts": {
+    "file": "entries/pages/dashboard/new/_page.server.ts.js",
+    "name": "entries/pages/dashboard/new/_page.server.ts",
+    "src": "src/routes/dashboard/new/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_dashboards.api.js"
+    ]
+  },
+  "src/routes/dashboard/new/+page.svelte": {
+    "file": "entries/pages/dashboard/new/_page.svelte.js",
+    "name": "entries/pages/dashboard/new/_page.svelte",
+    "src": "src/routes/dashboard/new/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_toast.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_Button.js",
+      "_Card.js",
+      "_Field.js",
+      "_Input.js",
+      "_dashboards.types.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.CsNwQ6TW.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/data/+page.server.ts": {
+    "file": "entries/pages/data/_page.server.ts.js",
+    "name": "entries/pages/data/_page.server.ts",
+    "src": "src/routes/data/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_sync.api.js",
+      "_interfaces.js"
+    ]
+  },
+  "src/routes/data/+page.svelte": {
+    "file": "entries/pages/data/_page.svelte.js",
+    "name": "entries/pages/data/_page.svelte",
+    "src": "src/routes/data/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_toast.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_Card.js",
+      "_StatTile.js",
+      "_Button.js",
+      "_Badge.js",
+      "_Banner.js",
+      "_ProgressBar.js",
+      "_FilterChips.js",
+      "_metric-labels.js",
+      "_date.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.COpX5Ldo.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/heatmap/+server.ts": {
+    "file": "entries/endpoints/heatmap/_server.ts.js",
+    "name": "entries/endpoints/heatmap/_server.ts",
+    "src": "src/routes/heatmap/+server.ts",
+    "isEntry": true
+  },
+  "src/routes/insights/+page.server.ts": {
+    "file": "entries/pages/insights/_page.server.ts.js",
+    "name": "entries/pages/insights/_page.server.ts",
+    "src": "src/routes/insights/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_insights.api.js",
+      "_consent.api.js",
+      "_range-context.js",
+      "_tier.js"
+    ]
+  },
+  "src/routes/insights/+page.svelte": {
+    "file": "entries/pages/insights/_page.svelte.js",
+    "name": "entries/pages/insights/_page.svelte",
+    "src": "src/routes/insights/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_client.js",
+      "_toast.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_Card.js",
+      "_Badge.js",
+      "_Banner.js",
+      "_Skeleton.js",
+      "_StatTile.js",
+      "_TrendChart.js",
+      "_RangeBadge.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_date.js",
+      "_series.js",
+      "_ConsentPanel.js",
+      "_ReadinessGauge.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.C7O5Uft_.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/login/+page.svelte": {
+    "file": "entries/pages/login/_page.svelte.js",
+    "name": "entries/pages/login/_page.svelte",
+    "src": "src/routes/login/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_stores.js",
+      "_Button.js",
+      "_Card.js",
+      "_toast.js",
+      "_ThemeToggle.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.MbQT0brc.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/power/+server.ts": {
+    "file": "entries/endpoints/power/_server.ts.js",
+    "name": "entries/endpoints/power/_server.ts",
+    "src": "src/routes/power/+server.ts",
+    "isEntry": true
+  },
+  "src/routes/running/+server.ts": {
+    "file": "entries/endpoints/running/_server.ts.js",
+    "name": "entries/endpoints/running/_server.ts",
+    "src": "src/routes/running/+server.ts",
+    "isEntry": true
+  },
+  "src/routes/settings/+page.server.ts": {
+    "file": "entries/pages/settings/_page.server.ts.js",
+    "name": "entries/pages/settings/_page.server.ts",
+    "src": "src/routes/settings/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_health.api.js",
+      "_consent.api.js",
+      "_mcpUrl.api.js",
+      "_index3.js",
+      "_tier.js"
+    ]
+  },
+  "src/routes/settings/+page.svelte": {
+    "file": "entries/pages/settings/_page.svelte.js",
+    "name": "entries/pages/settings/_page.svelte",
+    "src": "src/routes/settings/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_client.js",
+      "_toast.js",
+      "_Card.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_ConsentPanel.js",
+      "_Button.js",
+      "_Badge.js",
+      "_Toggle.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_date.js",
+      "_SetupForm.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.UVbts_OU.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/settings/integrations/+page.server.ts": {
+    "file": "entries/pages/settings/integrations/_page.server.ts.js",
+    "name": "entries/pages/settings/integrations/_page.server.ts",
+    "src": "src/routes/settings/integrations/+page.server.ts",
+    "isEntry": true
+  },
+  "src/routes/settings/integrations/+page.svelte": {
+    "file": "entries/pages/settings/integrations/_page.svelte.js",
+    "name": "entries/pages/settings/integrations/_page.svelte",
+    "src": "src/routes/settings/integrations/+page.svelte",
+    "isEntry": true
+  },
+  "src/routes/styleguide/+page.svelte": {
+    "file": "entries/pages/styleguide/_page.svelte.js",
+    "name": "entries/pages/styleguide/_page.svelte",
+    "src": "src/routes/styleguide/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_Button.js",
+      "_Card.js",
+      "_Input.js",
+      "_Field.js",
+      "_Badge.js",
+      "_SegmentedControl.js",
+      "_Banner.js",
+      "_toast.js",
+      "_Skeleton.js",
+      "_StatTile.js",
+      "_AppShell.js",
+      "_Sparkline.js",
+      "_BarChart.js",
+      "_RadarChart.js",
+      "_TrendChart.js",
+      "_Table.js",
+      "_Toast2.js",
+      "_Toggle.js",
+      "_RankMedal.js",
+      "_DeltaBadge.js",
+      "_RangeBadge.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_range.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.DrVLmARY.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css"
+    ]
+  },
+  "src/routes/training/+layout.server.ts": {
+    "file": "entries/pages/training/_layout.server.ts.js",
+    "name": "entries/pages/training/_layout.server.ts",
+    "src": "src/routes/training/+layout.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_training-nav.js"
+    ]
+  },
+  "src/routes/training/+layout.svelte": {
+    "file": "entries/pages/training/_layout.svelte.js",
+    "name": "entries/pages/training/_layout.svelte",
+    "src": "src/routes/training/+layout.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_stores.js",
+      "_toast.js",
+      "_SubNav.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_client.js",
+      "_client2.js",
+      "_AppShell.js",
+      "_SyncFooter.js",
+      "_training-nav.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_layout.BKsfZ4Px.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/training/+page.server.ts": {
+    "file": "entries/pages/training/_page.server.ts.js",
+    "name": "entries/pages/training/_page.server.ts",
+    "src": "src/routes/training/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_training-load.js",
+      "_power-profile.js",
+      "_load-risk.js",
+      "_streak.js",
+      "_date.js",
+      "_range.js",
+      "_series.js",
+      "_sport-labels.js",
+      "_training-nav.js",
+      "_weekly-volume.js",
+      "_range-context.js"
+    ]
+  },
+  "src/routes/training/+page.svelte": {
+    "file": "entries/pages/training/_page.svelte.js",
+    "name": "entries/pages/training/_page.svelte",
+    "src": "src/routes/training/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_Card.js",
+      "_Badge.js",
+      "_StatTile.js",
+      "_BarChart.js",
+      "_TrendChart.js",
+      "_StackedBar.js",
+      "_date.js",
+      "_series.js",
+      "_RangeBadge.js",
+      "_sport-labels.js",
+      "_FilterChips.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.B_FYr3s2.css"
+    ]
+  },
+  "src/routes/training/bieg/+page.server.ts": {
+    "file": "entries/pages/training/bieg/_page.server.ts.js",
+    "name": "entries/pages/training/bieg/_page.server.ts",
+    "src": "src/routes/training/bieg/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_activity-power.js",
+      "_running-profile.js",
+      "_date.js",
+      "_efficiency.js",
+      "_pace-model.js",
+      "_race-predictor.js",
+      "_best-efforts.js",
+      "_sport-labels.js",
+      "_range.js",
+      "_series.js",
+      "_range-context.js"
+    ]
+  },
+  "src/routes/training/bieg/+page.svelte": {
+    "file": "entries/pages/training/bieg/_page.svelte.js",
+    "name": "entries/pages/training/bieg/_page.svelte",
+    "src": "src/routes/training/bieg/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_Card.js",
+      "_StatTile.js",
+      "_BarChart.js",
+      "_StackedBar.js",
+      "_TrendChart.js",
+      "_RangeBadge.js",
+      "_date.js",
+      "_series.js",
+      "_Badge.js",
+      "_RadarChart.js",
+      "_DeltaBadge.js",
+      "_RankMedal.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.DiOf15vD.css"
+    ]
+  },
+  "src/routes/training/cele/+page.server.ts": {
+    "file": "entries/pages/training/cele/_page.server.ts.js",
+    "name": "entries/pages/training/cele/_page.server.ts",
+    "src": "src/routes/training/cele/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_season.api.js"
+    ]
+  },
+  "src/routes/training/cele/+page.svelte": {
+    "file": "entries/pages/training/cele/_page.svelte.js",
+    "name": "entries/pages/training/cele/_page.svelte",
+    "src": "src/routes/training/cele/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_client.js",
+      "_Button.js",
+      "_Card.js",
+      "_toast.js",
+      "_Banner.js",
+      "_client2.js",
+      "_date.js",
+      "_Badge.js",
+      "_ProgressBar.js",
+      "_exports.js",
+      "_utils2.js",
+      "_root.js",
+      "_Input.js",
+      "_Field.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.CZHbx81B.css",
+      "_app/immutable/assets/Badge.C9ADkSY6.css",
+      "_app/immutable/assets/SegmentedControl.BOlNfaPm.css",
+      "_app/immutable/assets/AppShell.DiXQWGBj.css",
+      "_app/immutable/assets/FilterChips.B9RzzoNx.css",
+      "_app/immutable/assets/BarChart.qMmqKHN1.css",
+      "_app/immutable/assets/Card.CXE_nlgE.css",
+      "_app/immutable/assets/StackedBar.BBwLl61w.css",
+      "_app/immutable/assets/TrendChart._LOsMDiB.css",
+      "_app/immutable/assets/RadarChart.D1frK0He.css",
+      "_app/immutable/assets/Table.BDK44Tgb.css",
+      "_app/immutable/assets/DeltaBadge.BmQMXR2K.css"
+    ]
+  },
+  "src/routes/training/marsz/+page.server.ts": {
+    "file": "entries/pages/training/marsz/_page.server.ts.js",
+    "name": "entries/pages/training/marsz/_page.server.ts",
+    "src": "src/routes/training/marsz/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_metric-specs.js",
+      "_date.js",
+      "_range.js",
+      "_series.js",
+      "_sport-labels.js",
+      "_range-context.js"
+    ]
+  },
+  "src/routes/training/marsz/+page.svelte": {
+    "file": "entries/pages/training/marsz/_page.svelte.js",
+    "name": "entries/pages/training/marsz/_page.svelte",
+    "src": "src/routes/training/marsz/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_Card.js",
+      "_StatTile.js",
+      "_BarChart.js",
+      "_TrendChart.js",
+      "_date.js",
+      "_series.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.Yg-Af236.css"
+    ]
+  },
+  "src/routes/training/objetosc/+page.server.ts": {
+    "file": "entries/pages/training/objetosc/_page.server.ts.js",
+    "name": "entries/pages/training/objetosc/_page.server.ts",
+    "src": "src/routes/training/objetosc/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_date.js",
+      "_sport-labels.js"
+    ]
+  },
+  "src/routes/training/objetosc/+page.svelte": {
+    "file": "entries/pages/training/objetosc/_page.svelte.js",
+    "name": "entries/pages/training/objetosc/_page.svelte",
+    "src": "src/routes/training/objetosc/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_Card.js",
+      "_StatTile.js",
+      "_Badge.js",
+      "_BarChart.js",
+      "_TrendChart.js",
+      "_SegmentedControl.js",
+      "_date.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.1y7fL5oy.css"
+    ]
+  },
+  "src/routes/training/plan/+page.server.ts": {
+    "file": "entries/pages/training/plan/_page.server.ts.js",
+    "name": "entries/pages/training/plan/_page.server.ts",
+    "src": "src/routes/training/plan/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_workouts.api.js",
+      "_planner.js",
+      "_date.js"
+    ]
+  },
+  "src/routes/training/plan/+page.svelte": {
+    "file": "entries/pages/training/plan/_page.svelte.js",
+    "name": "entries/pages/training/plan/_page.svelte",
+    "src": "src/routes/training/plan/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_Card.js",
+      "_Button.js",
+      "_Badge.js",
+      "_Banner.js",
+      "_ConfirmDialog.js",
+      "_toast.js",
+      "_client.js",
+      "_stores.js",
+      "_date.js",
+      "_sport-labels.js",
+      "_planner.js",
+      "_workouts.js",
+      "_Field.js",
+      "_Input.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.A2ejnaZh.css"
+    ]
+  },
+  "src/routes/training/rower/+page.server.ts": {
+    "file": "entries/pages/training/rower/_page.server.ts.js",
+    "name": "entries/pages/training/rower/_page.server.ts",
+    "src": "src/routes/training/rower/+page.server.ts",
+    "isEntry": true,
+    "imports": [
+      "_power-profile.js",
+      "_sport-labels.js",
+      "_date.js"
+    ]
+  },
+  "src/routes/training/rower/+page.svelte": {
+    "file": "entries/pages/training/rower/_page.svelte.js",
+    "name": "entries/pages/training/rower/_page.svelte",
+    "src": "src/routes/training/rower/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_Card.js",
+      "_Badge.js",
+      "_Table.js",
+      "_TrendChart.js",
+      "_RadarChart.js",
+      "_date.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.BSxi4R7K.css"
+    ]
+  },
+  "virtual:__sveltekit/env": {
+    "file": "env.js",
+    "name": "env",
+    "src": "virtual:__sveltekit/env",
+    "isEntry": true
+  }
+}

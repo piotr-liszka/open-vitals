@@ -1,0 +1,51 @@
+# OpenVitals — DEV stack. Fast inner loop with Vite HMR, fully in Docker.
+#   make dev   (== docker compose -f docker-compose.dev.yml up)
+#
+# Differences from the production stack (docker-compose.yml, live-code):
+#   - Source is bind-mounted and the web app runs `vite dev` (hot reload), not a built image.
+#   - GARMIN_ADAPTER=mock, so the app serves fixture data and needs NO Garmin credentials
+#     and NO sidecar. (The real /mcp custom server only runs in the prod `npm start`; use
+#     `make up` to exercise MCP + the real sidecar.)
+#   - Dev-only secrets are inlined here; the real LAN .env is never used for dev.
+services:
+  web:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    command: sh -lc "corepack enable && pnpm install && pnpm exec vite dev --host 0.0.0.0 --port 3000"
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: development
+      # Overridable so `make dev-https` can set the https://…ts.net origin (correct redirect URIs
+      # + Secure cookies). Defaults to plain localhost http for the normal `make dev` inner loop.
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:${WEB_PORT:-3000}}
+      # When set, Vite serves for a TLS-terminating proxy (Tailscale Serve). See scripts/dev-https.sh.
+      DEV_HTTPS: ${DEV_HTTPS:-}
+      GARMIN_ADAPTER: mock
+      # Dev auth: sign in a fixed dev user without calling Google (no OAuth client needed).
+      AUTH_ADAPTER: mock
+      DATABASE_URL: postgres://garmin:garmin@db:5432/garmin_bridge
+      # macOS bind mounts don't forward inotify events into Linux; poll instead so HMR works.
+      CHOKIDAR_USEPOLLING: 'true'
+    depends_on:
+      - db
+    volumes:
+      - ./apps/web:/app
+      - web_node_modules:/app/node_modules
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: garmin
+      POSTGRES_PASSWORD: garmin
+      POSTGRES_DB: garmin_bridge
+    ports:
+      # Bound to loopback, not 0.0.0.0: this database has the password `garmin` in plain sight
+      # above, and an unqualified `5433:5432` publishes it to every machine on the network.
+      - '127.0.0.1:5433:5432' # host:container — inspect the dev DB locally on 5433
+    volumes:
+      - db_dev_data:/var/lib/postgresql/data
+
+volumes:
+  web_node_modules:
+  db_dev_data:

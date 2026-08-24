@@ -1,0 +1,108 @@
+import { createTranslator } from '$lib/i18n';
+import { describe, it, expect } from 'vitest';
+import type { SportCount } from '$lib/server/store/types';
+import { groupCounts, trainingTabs, trainingTitle } from './training-nav';
+
+const t = createTranslator('pl');
+
+describe('training section navigation', () => {
+  it('shows the overview and goals when the user has no activities', () => {
+    // Goals is the one tab that does not depend on synced activities (spec 060): an empty account is
+    // exactly the one with a first race to put on the calendar.
+    expect(trainingTabs(t, [])).toEqual([
+      { href: '/training', label: 'Przegląd' },
+      { href: '/training/plan', label: 'Plan treningowy' },
+      { href: '/training/goals', label: 'Cele' }
+    ]);
+  });
+
+  it('renders a tab only for sport families the user actually has', () => {
+    const sports: SportCount[] = [
+      { sport: 'running', count: 40 },
+      { sport: 'trail_running', count: 4 },
+      { sport: 'lap_swimming', count: 12 }
+    ];
+
+    // Swimming has no analysis subpage yet, and there is no cycling at all → one sport tab.
+    expect(trainingTabs(t, sports)).toEqual([
+      { href: '/training', label: 'Przegląd' },
+      { href: '/training/volume', label: 'Objętość' },
+      { href: '/training/run', label: 'Bieg', count: 44 },
+      { href: '/training/plan', label: 'Plan treningowy' },
+      { href: '/training/goals', label: 'Cele' }
+    ]);
+  });
+
+  it('orders sport tabs ride → run → walk and sums keys within a family', () => {
+    const sports: SportCount[] = [
+      { sport: 'hiking', count: 3 },
+      { sport: 'running', count: 10 },
+      { sport: 'gravel_cycling', count: 5 },
+      { sport: 'virtual_ride', count: 7 },
+      { sport: 'walking', count: 2 }
+    ];
+
+    expect(trainingTabs(t, sports)).toEqual([
+      { href: '/training', label: 'Przegląd' },
+      { href: '/training/volume', label: 'Objętość' },
+      { href: '/training/ride', label: 'Rower', count: 12 },
+      { href: '/training/run', label: 'Bieg', count: 10 },
+      { href: '/training/walk', label: 'Marsz', count: 5 },
+      { href: '/training/plan', label: 'Plan treningowy' },
+      { href: '/training/goals', label: 'Cele' }
+    ]);
+  });
+
+  it('offers the cross-sport volume tab to anyone with an activity, whatever the sport', () => {
+    // Swimming has no subpage of its own, but a swimmer still has months and years to compare.
+    expect(trainingTabs(t, [{ sport: 'lap_swimming', count: 3 }])).toEqual([
+      { href: '/training', label: 'Przegląd' },
+      { href: '/training/volume', label: 'Objętość' },
+      { href: '/training/plan', label: 'Plan treningowy' },
+      { href: '/training/goals', label: 'Cele' }
+    ]);
+    // …and nobody with nothing synced sees it.
+    expect(trainingTabs(t, [])).not.toContainEqual({
+      href: '/training/volume',
+      label: 'Objętość'
+    });
+  });
+
+  it('folds unknown sport keys into the "other" family rather than dropping them', () => {
+    const counts = groupCounts([{ sport: 'brand_new_garmin_sport', count: 3 }]);
+    expect(counts.get('other')).toBe(3);
+  });
+
+  it('titles the shell per subpage', () => {
+    expect(trainingTitle(t, '/training')).toBe('Trening');
+    expect(trainingTitle(t, '/training/volume')).toBe('Trening · Objętość');
+    expect(trainingTitle(t, '/training/ride')).toBe('Trening · Rower');
+    expect(trainingTitle(t, '/training/walk')).toBe('Trening · Marsz');
+    expect(trainingTitle(t, '/training/goals')).toBe('Trening · Cele');
+    expect(trainingTitle(t, '/training/nieznane')).toBe('Trening');
+  });
+});
+
+/**
+ * Spec 066. The planner is offered on the same terms as `Cele`, and for the same reason: neither is a
+ * report on training that already happened, so neither can be gated on having any.
+ */
+describe('the planner tab (spec 066)', () => {
+  it('is offered even to an athlete with no activities at all', () => {
+    expect(trainingTabs(t, []).map((t) => t.href)).toContain('/training/plan');
+  });
+
+  it('sits before Cele — a week is decided far more often than a season', () => {
+    const hrefs = trainingTabs(t, [{ sport: 'running', count: 4 }]).map((t) => t.href);
+    expect(hrefs.indexOf('/training/plan')).toBeLessThan(hrefs.indexOf('/training/goals'));
+  });
+
+  it('carries no count — it is a plan, not a tally of what you did', () => {
+    const plan = trainingTabs(t, [{ sport: 'running', count: 4 }]).find((t) => t.href === '/training/plan');
+    expect(plan?.count).toBeUndefined();
+  });
+
+  it('titles the section page', () => {
+    expect(trainingTitle(t, '/training/plan')).toBe('Trening · Plan treningowy');
+  });
+});
