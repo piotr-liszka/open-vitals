@@ -76,4 +76,27 @@ describe('TimelineStrip', () => {
     });
     expect(container.querySelector('.track')?.getAttribute('aria-label')).toBe('Struktura planu');
   });
+
+  it('draws no cursor line when cursor is absent', () => {
+    const { container } = render(TimelineStrip, {
+      props: { segments: [segment('a', 0, 1)], ariaLabel: 'Struktura' }
+    });
+    expect(container.querySelector('.cursor-line')).toBeNull();
+  });
+
+  it('places the cursor line at its fraction, dashed while only hovering', () => {
+    const { container } = render(TimelineStrip, {
+      props: { segments: [segment('a', 0, 1)], ariaLabel: 'Struktura', cursor: 0.3 }
+    });
+    const cursor = container.querySelector<HTMLElement>('.cursor-line');
+    expect(cursor?.style.left).toBe('30%');
+    expect(cursor?.classList.contains('pinned')).toBe(false);
+  });
+
+  it('marks the cursor line pinned once the shared selection is pinned', () => {
+    const { container } = render(TimelineStrip, {
+      props: { segments: [segment('a', 0, 1)], ariaLabel: 'Struktura', cursor: 0.3, cursorPinned: true }
+    });
+    expect(container.querySelector('.cursor-line')?.classList.contains('pinned')).toBe(true);
+  });
 });

@@ -5,6 +5,7 @@ import {
   RANGE_KEYS,
   RANGE_OPTIONS,
   bucketFor,
+  capRange,
   isRangeKey,
   parseRange,
   rangeKeyLabel,
@@ -145,6 +146,30 @@ describe('resolveRange', () => {
       expect(range.days).toBeGreaterThanOrEqual(1);
       expect(range.end).toBe(TODAY);
     }
+  });
+});
+
+describe('capRange (spec 095)', () => {
+  it('leaves a range at or under the cap untouched', () => {
+    const range = resolveRange('7', TODAY);
+    expect(capRange(range, 30)).toEqual(range);
+    expect(capRange(resolveRange('30', TODAY), 30)).toEqual(resolveRange('30', TODAY));
+  });
+
+  it('narrows a wider range to the cap, keeping the same end', () => {
+    const range = resolveRange('365', TODAY);
+    const capped = capRange(range, 30);
+    expect(capped.days).toBe(30);
+    expect(capped.end).toBe(TODAY);
+    expect(capped.start).toBe('2026-07-13');
+    expect(capped.bucket).toBe('day');
+  });
+
+  it('narrows an "all" range the same way, whatever it resolved to', () => {
+    const range = resolveRange('all', TODAY, '2020-01-01');
+    const capped = capRange(range, 30);
+    expect(capped.days).toBe(30);
+    expect(capped.end).toBe(TODAY);
   });
 });
 

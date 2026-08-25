@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { labelFitScale, readoutFitScale, readoutStep } from './readout-fit';
+  import { readoutStep } from './readout-fit';
 
   type Direction = 'up' | 'down' | 'flat';
   type Lane = 'orange' | 'red' | 'indigo' | 'cyan' | 'green' | 'amber' | 'sky' | 'teal' | 'violet' | 'lime';
@@ -10,7 +10,7 @@
     value: string | number;
     /** Unit suffixed to the readout, e.g. 'bpm' or '%'. */
     unit?: string;
-    /** Metric lane colour — tints the label marker and the readout accent. */
+    /** Metric lane colour — tints the tile's border/glow and the icon (spec 040). */
     accent?: Lane;
     /** Signed change; sign drives the trend direction/colour. */
     delta?: number | undefined;
@@ -67,31 +67,20 @@
   const laneVar = $derived(accent ? `var(--lane-${accent})` : undefined);
 
   // Long readouts ("6 h 52 min") step down a size instead of spilling past the tile border (spec 029).
+  // The step is a function of the rendered string's LENGTH only, never of the tile's own width or the
+  // exact glyphs in a particular value — so two tiles carrying values of the same length always render
+  // at the same size in the same grid (spec 040 — a per-value, per-width continuous scale used to make
+  // e.g. "30:26" and "4.94" render at visibly different sizes side by side, which read as broken, not
+  // "fitted"). A tile narrower than the token needs still gets a size-safe fallback, but that fallback
+  // is a fixed per-width step (below, in CSS), not a per-value one.
   const step = $derived(readoutStep(value, muted ? undefined : unit));
 
-  /*
-    …and the step is capped again by the tile's own width (spec 031). The tile is an inline-size
-    container, so these two scales let the CSS ask "how big can this string be here?" — the readout
-    tokens follow the viewport, which says nothing about a 118px column in an `auto-fit` grid.
-  */
-  const readoutScale = $derived(readoutFitScale(value, muted ? undefined : unit));
-  const labelScale = $derived(labelFitScale(label));
-
-  const tileStyle = $derived(
-    [
-      laneVar ? `--tile-accent: ${laneVar}` : '',
-      `--readout-scale: ${readoutScale}`,
-      `--label-scale: ${labelScale}`
-    ]
-      .filter(Boolean)
-      .join('; ')
-  );
+  const tileStyle = $derived(laneVar ? `--tile-accent: ${laneVar}` : '');
 </script>
 
-<div class="tile" class:has-accent={Boolean(accent)} class:has-icon={Boolean(icon)} style={tileStyle}>
+<div class="tile" class:has-accent={Boolean(accent)} style={tileStyle}>
   <div class="top">
     <span class="label">
-      {#if accent}<span class="marker" aria-hidden="true"></span>{/if}
       <span class="label-text">{label}</span>
     </span>
     {#if icon}<span class="icon" aria-hidden="true">{@render icon()}</span>{/if}
@@ -117,11 +106,14 @@
 
 <style>
   .tile {
-    --tile-accent: var(--color-accent);
+    /* Neutral by default; an `accent` prop overrides this inline (see `tileStyle` above) so the
+       card itself carries the metric's lane colour — a coloured border + glow, not a dot next to
+       the label (spec 040). */
+    --tile-accent: var(--color-border);
     /*
       The tile measures itself (spec 031). Its inline size comes from the page's grid and never from
-      its contents, so `inline-size` containment is free here — and it gives the readout and the label
-      the one number the tokens cannot know: how much room this particular tile has.
+      its contents, so `inline-size` containment is free here — it backs the readout's narrow-column
+      fallback below.
     */
     container-type: inline-size;
     display: flex;
@@ -129,9 +121,18 @@
     gap: var(--space-2);
     padding: var(--space-4) var(--space-5);
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--tile-accent);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-base);
+  }
+
+  /* The accent lives on the card, not on a marker dot next to the label (spec 040): a coloured
+     border plus a soft accent-tinted glow around it. */
+  .tile.has-accent {
+    box-shadow:
+      var(--shadow-sm),
+      0 0 0 3px color-mix(in srgb, var(--tile-accent) 14%, transparent);
   }
 
   .top {
@@ -141,17 +142,6 @@
     justify-content: space-between;
     gap: var(--space-2);
     min-width: 0;
-  }
-
-  /* What the label's own line loses to the accent dot and the optional trailing icon. */
-  .tile.has-accent {
-    --label-reserve: calc(var(--space-2) * 2);
-  }
-  .tile.has-icon {
-    --label-reserve: var(--space-6);
-  }
-  .tile.has-accent.has-icon {
-    --label-reserve: calc(var(--space-6) + var(--space-2) * 2);
   }
 
   .label {
@@ -168,11 +158,9 @@
     /*
       Two lines' worth of room, always. Tiles sit side by side in a grid, so a label that wraps must
       not make its own tile taller than its neighbours or push its readout off the row (spec 049).
-      Measured against the TOKEN rather than `1em`, so the container-query fit below — which can
-      shrink one tile's label and not the next one's — cannot reintroduce the mismatch.
     */
     min-height: calc(var(--text-xs) * var(--leading-snug) * 2);
-    /* Last-resort guard under the fit below: a word too long even at the floor breaks instead of escaping. */
+    /* Last-resort guard: a word too long even at the floor breaks instead of escaping the tile. */
     overflow-wrap: anywhere;
   }
 
@@ -184,16 +172,6 @@
     line-clamp: 2;
     overflow: hidden;
     min-width: 0;
-  }
-
-  .marker {
-    width: var(--space-2);
-    height: var(--space-2);
-    border-radius: var(--radius-full);
-    background: var(--tile-accent);
-    flex-shrink: 0;
-    /* Optically centred on the label's first line, not on the whole block. */
-    margin-top: calc((var(--text-xs) * var(--leading-snug) - var(--space-2)) / 2);
   }
 
   .icon {
@@ -259,39 +237,45 @@
   }
 
   /*
-    Container-relative fit (spec 031) — everything above sizes off tokens alone, this narrows it to the
-    tile. Gated on `@supports`, and placed after the base rules so it wins where it applies: a custom
-    property holding a unit the browser does not know computes to *inherit*, not to the declaration above
-    it, so without the gate a pre-container-query browser would render the hero readout at body size.
-    Inside the gate the token still caps every size — the tile's width can only ever shrink type that
-    would otherwise spill past the border.
+    Narrow-column fallback (spec 031, revised spec 040). Every tile in a grid shares the same column
+    width, so this steps `--tile-readout`/`--tile-readout-unit` down by CONTAINER WIDTH ALONE — never by
+    the value's own characters. Two tiles at the same width and the same readout step (above) therefore
+    always render identically, whatever the value's content is; only a tile whose column is genuinely too
+    narrow for its step (not "genuinely too narrow for this exact string") shrinks, and it shrinks to the
+    next fixed token rather than a continuous, per-value scale. `overflow: hidden` on `.readout` remains
+    the hard backstop for anything still too long at the floor.
+
+    (The previous mechanism computed a per-value scale from the string's own glyphs — which is why
+    "30:26" and "4.94" could render at visibly different sizes side by side in the same grid: same step,
+    different glyph mix, different scale. That was the bug; this section is the fix.)
   */
-  @supports (container-type: inline-size) {
-    .readout {
-      /* `--space-2` pays for the gap between the value and its unit. */
-      --readout-fit: calc((100cqw - var(--space-2)) * var(--readout-scale, 1));
-      --readout-size: min(var(--tile-readout, var(--readout-xl)), var(--readout-fit));
+  @container (max-width: 200px) {
+    .readout.step-xl {
+      --tile-readout: var(--readout-lg);
+      --tile-readout-unit: var(--readout-unit);
     }
-
-    .value {
-      font-size: var(--readout-size);
+    .readout.step-lg {
+      --tile-readout: var(--readout-md);
+      --tile-readout-unit: var(--text-md);
     }
-
-    /* Follows the value down whichever way it shrank — by step token, or by tile width. */
-    .unit {
-      font-size: min(var(--tile-readout-unit, var(--readout-unit)), calc(var(--readout-size) * 0.45));
+    .readout.step-md {
+      --tile-readout: var(--readout-sm);
+      --tile-readout-unit: var(--text-base);
     }
+  }
 
-    /*
-      Micro-caps shrink to fit before they break: a single long word ("PRZEWYŻSZENIE") has no wrap
-      opportunity, so in a narrow column it used to run past the tile border. Floored at 0.72 of the
-      token — below that the word wraps instead, which reads better than illegible caps.
-    */
+  @container (max-width: 140px) {
+    .readout.step-xl {
+      --tile-readout: var(--readout-md);
+      --tile-readout-unit: var(--text-md);
+    }
+    .readout.step-lg {
+      --tile-readout: var(--readout-sm);
+      --tile-readout-unit: var(--text-base);
+    }
+    /* Micro-caps get a little more room back once the readout itself has already stepped down. */
     .label {
-      font-size: max(
-        calc(var(--text-xs) * 0.72),
-        min(var(--text-xs), calc((100cqw - var(--label-reserve, 0px)) * var(--label-scale, 1)))
-      );
+      font-size: calc(var(--text-xs) * 0.85);
     }
   }
 

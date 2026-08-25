@@ -39,6 +39,7 @@
     type ActivityChartSpec,
     type ChartAxisMode,
     type ChartGroupKey,
+    type ChartSeriesSpec,
     type ChartValueKind
   } from './activity-charts';
   import { buildExecutedStrip, buildPlanStrip, type PlannedStepKind } from './activity-plan';
@@ -64,6 +65,13 @@
   let pinned = $state<number | null>(null);
   /** Shared live-hover sample index — the dashed rule that tracks the pointer across the stack. */
   let hovered = $state<number | null>(null);
+  /** 'stacked' draws one chart per metric (the original layout); 'combined' overlays a group's
+   *  metrics on one chart so their shapes can be read against each other, with the legend toggling
+   *  each one off. */
+  let chartMode = $state<'stacked' | 'combined'>('stacked');
+  /** The panel's own root, so a pointerdown elsewhere on the page can be told apart from one on a
+   *  chart or the strip — see the document-level listener below. */
+  let panelEl: HTMLDivElement | undefined = $state();
   /**
    * Left plot inset each chart's own y ticks ask for, keyed by chart. The widest wins for all of
    * them; a chart only ever reports its NATURAL inset, so feeding the maximum back cannot oscillate.
@@ -181,6 +189,37 @@
     axis = value === 'distance' ? 'distance' : 'time';
   }
 
+  const chartModeOptions = $derived([
+    { value: 'stacked', label: i18n.t('streams.viewMode.stacked') },
+    { value: 'combined', label: i18n.t('streams.viewMode.combined') }
+  ]);
+
+  function onChartModeChange(value: string): void {
+    chartMode = value === 'combined' ? 'combined' : 'stacked';
+  }
+
+  /** A group's metrics overlaid as named series on one chart — each chart's own `series` (if it
+   *  already carries more than one line) is flattened in rather than nested, so the legend lists
+   *  every line at the same level. */
+  function combinedSeries(charts: readonly ActivityChartSpec[]): ChartSeriesSpec[] {
+    return charts.flatMap((c) =>
+      c.series
+        ? c.series.map((s) => ({ name: s.name || c.title, values: s.values, color: s.color }))
+        : [{ name: c.title, values: c.values, color: c.color }]
+    );
+  }
+
+  /**
+   * Once metrics of different kinds share a chart there is no single correct read-out format —
+   * bpm and min/km cannot both be right. The combined chart's own legend/point labels use the
+   * first metric's formatter as the closest approximation; the floating read-out bar below still
+   * formats every metric correctly regardless of which mode is showing, so nothing here is the
+   * only source of truth for a value.
+   */
+  function combinedFormatter(charts: readonly ActivityChartSpec[]): (n: number) => string {
+    return formatter(charts[0]?.kind ?? 'decimal');
+  }
+
   function formatter(kind: ChartValueKind): (n: number) => string {
     if (kind === 'pace') return (n) => fmtPace(n);
     if (kind === 'decimal') return (n) => fmtNum(n, 1, i18n.locale);
@@ -206,6 +245,17 @@
   /** The moment the strip reports: a live hover wins, else whatever is pinned. */
   const active = $derived(hovered ?? pinned);
   const activeTime = $derived(active === null ? null : (set.elapsedS[active] ?? null));
+  /**
+   * The active moment as the same 0–1 fraction the plan/executed strips use for their own blocks
+   * (elapsed time since the first sample, over the chart's elapsed span), so the strips can draw
+   * the identical crosshair the charts below them are already drawing.
+   */
+  const activeFraction = $derived(
+    active === null || elapsedSpanS <= 0
+      ? null
+      : ((set.elapsedS[active] ?? 0) - (set.elapsedS[0] ?? 0)) / elapsedSpanS
+  );
+  const activePinned = $derived(hovered === null && pinned !== null);
   const activeDistance = $derived(active === null || !set.distanceM ? null : (set.distanceM[active] ?? null));
   const activeLead = $derived(fmtClock(activeTime));
   const activeSecondary = $derived(
@@ -234,9 +284,28 @@
           .filter((part): part is string => Boolean(part))
           .join(' · ')
   );
+
+  /*
+   * A pin is meant to survive the pointer leaving the chart — that is the whole point of pinning —
+   * but it has to end somewhere, and "somewhere else on the page" is that place. Each chart clears
+   * `hoverIndex` on its own pointerleave; nothing previously cleared `selectedIndex`, so a pin
+   * outlived every click that landed outside the panel. A capturing document-level listener is the
+   * only place that can see those clicks: they never reach a handler scoped to the panel itself.
+   */
+  $effect(() => {
+    function onDocumentPointerDown(e: PointerEvent): void {
+      if (pinned === null) return;
+      const target = e.target;
+      if (panelEl && target instanceof Node && panelEl.contains(target)) return;
+      pinned = null;
+      hovered = null;
+    }
+    document.addEventListener('pointerdown', onDocumentPointerDown, true);
+    return () => document.removeEventListener('pointerdown', onDocumentPointerDown, true);
+  });
 </script>
 
-<div class="panel">
+<div class="panel" bind:this={panelEl}>
   <header class="head">
     <!-- Constant-height slot: the hint idle, a screen-reader sentence while a moment is active. The
          visible values live in the floating bar below, so this never changes the header's height. -->
@@ -249,38 +318,55 @@
         <p class="sr-only">{announcement}</p>
       {/if}
     </div>
-    {#if set.canUseDistance}
+    <div class="head-controls">
       <SegmentedControl
-        options={axisOptions}
-        value={axis}
-        onChange={onAxisChange}
-        ariaLabel={i18n.t('streams.axisAriaLabel')}
+        options={chartModeOptions}
+        value={chartMode}
+        onChange={onChartModeChange}
+        ariaLabel={i18n.t('streams.viewModeAriaLabel')}
         size="sm"
       />
-    {/if}
+      {#if set.canUseDistance}
+        <SegmentedControl
+          options={axisOptions}
+          value={axis}
+          onChange={onAxisChange}
+          ariaLabel={i18n.t('streams.axisAriaLabel')}
+          size="sm"
+        />
+      {/if}
+    </div>
   </header>
 
   {#if showStrip}
     <section class="plan-strip">
-      <div class="plan-head">
-        <h4 class="group-title">{i18n.t('plan.strip.title')}</h4>
-        <p class="plan-note">{i18n.t('plan.strip.note')}</p>
-      </div>
-      <TimelineStrip
-        segments={stripSegments}
-        markers={stripMarkers}
-        insetLeft={gutterLeft}
-        insetRight={AXIS_GAP}
-        ariaLabel={i18n.t('plan.strip.ariaLabel')}
-      />
-      {#if showExecuted}
-        <p class="plan-note strip-label">{i18n.t('plan.strip.executedLabel')}</p>
+      <h4 class="group-title">{i18n.t('plan.strip.title')}</h4>
+      <p class="plan-note">{i18n.t('plan.strip.note')}</p>
+
+      <div class="plan-sub">
+        <p class="plan-sub-label">{i18n.t('plan.strip.plannedLabel')}</p>
         <TimelineStrip
-          segments={executedSegments}
+          segments={stripSegments}
+          markers={stripMarkers}
           insetLeft={gutterLeft}
           insetRight={AXIS_GAP}
-          ariaLabel={i18n.t('plan.strip.executedAriaLabel')}
+          ariaLabel={i18n.t('plan.strip.ariaLabel')}
+          cursor={activeFraction}
+          cursorPinned={activePinned}
         />
+      </div>
+      {#if showExecuted}
+        <div class="plan-sub">
+          <p class="plan-sub-label">{i18n.t('plan.strip.executedLabel')}</p>
+          <TimelineStrip
+            segments={executedSegments}
+            insetLeft={gutterLeft}
+            insetRight={AXIS_GAP}
+            ariaLabel={i18n.t('plan.strip.executedAriaLabel')}
+            cursor={activeFraction}
+            cursorPinned={activePinned}
+          />
+        </div>
       {/if}
     </section>
   {/if}
@@ -288,32 +374,51 @@
   {#each groups as group (group.key)}
     <section class="group">
       <h4 class="group-title">{group.title}</h4>
-      {#each group.charts as chart (chart.key)}
+      {#if chartMode === 'combined'}
         <div class="chart-row">
-          <div class="chart-head">
-            <span class="chart-title" style="--lane: {chart.color}">{chart.title}</span>
-            {#if chart.note}<span class="chart-note">{chart.note}</span>{/if}
-          </div>
-          <!-- `series` and `formatTick` are spread in only when they apply: under
-               `exactOptionalPropertyTypes` an explicit `undefined` is not the same as absent. -->
           <TrendChart
-            {...chart.series ? { series: chart.series.map((s) => ({ ...s })) } : { values: chart.values }}
-            {...chart.kind === 'pace' ? { formatTick: (n: number) => fmtPace(n) } : {}}
+            series={combinedSeries(group.charts)}
             labels={[...set.labels]}
-            color={chart.color}
-            unit={chart.unit}
-            label={chart.title}
-            height={chart.series ? 170 : 150}
-            showArea={chart.area}
-            formatValue={formatter(chart.kind)}
+            label={group.title}
+            height={220}
+            showArea={false}
+            legend={true}
+            formatValue={combinedFormatter(group.charts)}
             bind:selectedIndex={pinned}
             bind:hoverIndex={hovered}
             tooltip={false}
             {gutterLeft}
-            onGutter={(px) => (gutters[chart.key] = px)}
+            onGutter={(px) => (gutters[`${group.key}::combined`] = px)}
           />
         </div>
-      {/each}
+      {:else}
+        {#each group.charts as chart (chart.key)}
+          <div class="chart-row">
+            <div class="chart-head">
+              <span class="chart-title" style="--lane: {chart.color}">{chart.title}</span>
+              {#if chart.note}<span class="chart-note">{chart.note}</span>{/if}
+            </div>
+            <!-- `series` and `formatTick` are spread in only when they apply: under
+               `exactOptionalPropertyTypes` an explicit `undefined` is not the same as absent. -->
+            <TrendChart
+              {...chart.series ? { series: chart.series.map((s) => ({ ...s })) } : { values: chart.values }}
+              {...chart.kind === 'pace' ? { formatTick: (n: number) => fmtPace(n) } : {}}
+              labels={[...set.labels]}
+              color={chart.color}
+              unit={chart.unit}
+              label={chart.title}
+              height={chart.series ? 170 : 150}
+              showArea={chart.area}
+              formatValue={formatter(chart.kind)}
+              bind:selectedIndex={pinned}
+              bind:hoverIndex={hovered}
+              tooltip={false}
+              {gutterLeft}
+              onGutter={(px) => (gutters[chart.key] = px)}
+            />
+          </div>
+        {/each}
+      {/if}
     </section>
   {/each}
 </div>
@@ -332,6 +437,15 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+
+  /* Both header controls in one top-right cluster: the view-mode switch and, when the activity has
+     a speed stream, the axis switch next to it. */
+  .head-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     flex-wrap: wrap;
   }
 
@@ -375,15 +489,7 @@
   .plan-strip {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .plan-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
     gap: var(--space-3);
-    flex-wrap: wrap;
   }
 
   .plan-note {
@@ -392,10 +498,19 @@
     color: var(--color-text-muted);
   }
 
-  /* Names the second row so the two strips are never mistaken for one two-line diagram. */
-  .strip-label {
-    margin-top: var(--space-1);
+  /* One "Planned" and one "Executed" subsection under the "Workout structure" heading, each its
+     own labelled strip rather than a bare second row that reads as an unlabelled continuation. */
+  .plan-sub {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .plan-sub-label {
+    margin: 0;
+    font-size: var(--text-xs);
     font-weight: var(--font-semibold);
+    color: var(--color-text-muted);
   }
 
   .group {

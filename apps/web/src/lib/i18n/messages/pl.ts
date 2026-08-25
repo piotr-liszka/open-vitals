@@ -1024,6 +1024,9 @@ export const pl = {
   'streams.axisAriaLabel': 'Oś pozioma wykresów',
   'streams.hint':
     'Najedź na dowolny wykres — ten sam moment zaznaczy się na wszystkich. Kliknięcie przypina go na stałe.',
+  'streams.viewMode.stacked': 'Pojedynczo',
+  'streams.viewMode.combined': 'Razem',
+  'streams.viewModeAriaLabel': 'Układ wykresów',
 
   /* ---- activity-charts.ts: chart specs passed as props into TrendChart ---- */
   'chart.section.effort': 'Wysiłek',
@@ -1474,6 +1477,7 @@ export const pl = {
   'insights.anomalyTitleHigh': '{label}: nietypowo wysoko {date}',
   'insights.anomalyTitleLow': '{label}: nietypowo nisko {date}',
   'insights.anomalyBody': 'Odczyt {value} — {sd} SD od Twojej bazy z {days} dni (odchylenie {severity}).',
+  'insights.anomalySd': '±{sd} SD',
   'insights.correlationMeta': 'r = {r} · {days} dni',
   'insights.correlationHigher': 'Więcej „{a}” zwykle wiąże się z wyższym „{b}”.',
   'insights.correlationLower': 'Więcej „{a}” zwykle wiąże się z niższym „{b}”.',
@@ -1533,8 +1537,6 @@ export const pl = {
 
   'readiness.title': 'Gotowość',
   'readiness.subtitle': 'Jak bardzo jesteś dziś gotowy do treningu i kiedy wrócisz do pełnej formy',
-  'readiness.notConnected': 'Połącz konto Garmin, aby zobaczyć swoją gotowość.',
-  'readiness.connectCta': 'Połącz na pulpicie →',
   'readiness.notEnabled':
     'Gotowość korzysta z Twoich wielodniowych metryk. Włącz tryb zaawansowany, aby ją uruchomić.',
   'readiness.notEnoughData': 'Za mało danych — synchronizuj zegarek i wróć za kilka dni.',
@@ -1575,7 +1577,8 @@ export const pl = {
     'Sesja wyszła o {pct}% mocniej, niż zakładał plan ({metric}) — następnym razem trzymaj przedział z planu.',
   'plan.takeaway.easier':
     'Sesja wyszła o {pct}% lżej, niż zakładał plan ({metric}) — następnym razem trzymaj przedział z planu.',
-  'plan.strip.title': 'Struktura planu',
+  'plan.strip.title': 'Struktura treningu',
+  'plan.strip.plannedLabel': 'Plan',
   'plan.strip.ariaLabel': 'Zaplanowana struktura treningu na osi czasu',
   'plan.strip.note': 'Bloki planu na tej samej osi czasu co wykresy poniżej.',
   'plan.stepKind.warmup': 'Rozgrzewka',
@@ -2061,7 +2064,7 @@ export const pl = {
   'condition.stage.awake': 'Czuwanie',
   'condition.sleepStagesAriaLabel': 'Fazy snu',
   'condition.channelsTitle': 'Kanały odnowy',
-  'condition.channelsSubtitle': 'względem Twojej bazy z ostatnich dni',
+  'condition.channelsSubtitle': 'vs ostatnie {days} dni',
   'condition.channelDelta': '{delta} vs {baseline}',
   'condition.batteryPeriod': 'ostatnia doba',
   'condition.staleBanner':

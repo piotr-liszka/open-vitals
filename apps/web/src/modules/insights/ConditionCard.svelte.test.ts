@@ -124,6 +124,7 @@ function snapshot(over: Partial<ConditionSnapshot> = {}): ConditionSnapshot {
     // exercises the fallback — our own composite leading, with no switch.
     garmin: null,
     recovery: null,
+    windowDays: 30,
     ...over
   };
 }
@@ -160,6 +161,9 @@ function garminReadiness(over: Partial<GarminReadiness> = {}): GarminReadiness {
     hrvWeeklyAvg: 61,
     acuteLoad: 300,
     summary: 'Garmin: gotowość bardzo niska — do pełnej regeneracji 1 dzień 10 h.',
+    // Spec 095: the recovery timer is deliberately absent here — the `.recovery` pill says it instead.
+    headline: 'Garmin: gotowość bardzo niska',
+    detailClause: null,
     ...over
   };
 }
@@ -208,6 +212,16 @@ describe('ConditionCard', () => {
       ['good', 'bad', 'flat'].find((c) => el.classList.contains(c)) ?? 'none';
     expect(deltas.map(tone)).toEqual(['bad', 'good', 'bad']);
     expect(text(deltas[2]!)).toContain('+12,0%');
+  });
+
+  // Spec 095: the "vs" figures move with the page's range switch, so the caption must name the
+  // window it is actually reading off — not a fixed, unstated number.
+  it('names the actual baseline window in the channels caption', () => {
+    const { container } = render(ConditionCard, {
+      props: { condition: snapshot({ windowDays: 7 }), connected: true }
+    });
+    const caption = container.querySelector('section[aria-labelledby="condition-channels"] .block-meta');
+    expect(text(caption)).toBe('vs ostatnie 7 dni');
   });
 
   it('omits sleep readouts the payload cannot support instead of printing dashes', () => {
@@ -306,6 +320,44 @@ describe('ConditionCard', () => {
       props: { condition: snapshot({ garmin: garminReadiness() }), connected: true }
     });
     expect(localStorage.getItem('openvitals.condition.source')).toBeNull();
+  });
+
+  /*
+   * Spec 095: the pill above already ticks down "do pełnej regeneracji" / "gotowy"; the sentence
+   * beside it used to say the same thing again in its own words ("regeneracja zakończona"). Now the
+   * sentence carries the headline and whatever clauses are left once the timer is set aside.
+   */
+  it('never repeats the recovery timer between the pill and the sentence', () => {
+    const { container } = render(ConditionCard, {
+      props: {
+        condition: snapshot({
+          garmin: garminReadiness({
+            headline: 'Garmin: gotowość szczytowa',
+            detailClause: 'Stres poniżej bazy (7), Body Battery powyżej bazy (100), sen 8 h 18 min'
+          }),
+          recovery: recoveryTime({ minutes: 0 })
+        }),
+        connected: true
+      }
+    });
+
+    const summary = text(container.querySelector('p.summary'));
+    expect(summary).toBe(
+      'Garmin: gotowość szczytowa — Stres poniżej bazy (7), Body Battery powyżej bazy (100), sen 8 h 18 min.'
+    );
+    expect(summary).not.toContain('regenera');
+    // The pill is where the recovery fact actually lives.
+    expect(text(container.querySelector('.recovery'))).toContain('gotowy');
+  });
+
+  it('drops the sentence down to just the headline when there is nothing else to say', () => {
+    const { container } = render(ConditionCard, {
+      props: {
+        condition: snapshot({ garmin: garminReadiness({ headline: 'Garmin: gotowość wysoka' }) }),
+        connected: true
+      }
+    });
+    expect(text(container.querySelector('p.summary'))).toBe('Garmin: gotowość wysoka.');
   });
 
   it('shows Garmin recovery time whichever score leads, and says "gotowy" at zero', () => {

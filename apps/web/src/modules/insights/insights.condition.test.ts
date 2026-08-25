@@ -282,6 +282,23 @@ describe('computeCondition', () => {
     expect(snapshot.summary.length).toBeGreaterThan(0);
   });
 
+  /*
+   * Spec 095: the card says "vs your last {n} days" off this, so it must be the window the caller
+   * actually fetched — not a number this module invents on its own.
+   */
+  describe('windowDays', () => {
+    it('reports the caller-supplied window', () => {
+      const snapshot = computeCondition(t, series(), readiness(), TODAY, { windowDays: 7 })!;
+      expect(snapshot.windowDays).toBe(7);
+    });
+
+    it('falls back to the longest series length when the caller passes none', () => {
+      // `series()` fetches 3 days per channel — every test above this one relies on that default.
+      const snapshot = computeCondition(t, series(), readiness(), TODAY)!;
+      expect(snapshot.windowDays).toBe(3);
+    });
+  });
+
   it('still reports when only some channels exist', () => {
     const snapshot = computeCondition(
       t,

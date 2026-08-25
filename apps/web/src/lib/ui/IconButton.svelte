@@ -14,11 +14,15 @@
   import Spinner from './Spinner.svelte';
   import type { IconName } from './icons';
 
+  type Variant = 'default' | 'danger';
+
   interface Props extends Omit<HTMLButtonAttributes, 'aria-label'> {
     /** Glyph from the shared icon set. */
     icon: IconName;
     /** Accessible name — required, because there is no visible text. Also the default tooltip. */
     label: string;
+    /** `danger` tints hover/focus toward `--color-danger` — a destructive action (e.g. remove a row). */
+    variant?: Variant;
     /** Swaps the glyph for a spinner and disables interaction. */
     loading?: boolean;
     size?: 'sm' | 'md';
@@ -27,6 +31,7 @@
   let {
     icon,
     label,
+    variant = 'default',
     loading = false,
     size = 'md',
     disabled = false,
@@ -39,7 +44,7 @@
 </script>
 
 <button
-  class="icon-btn {size}"
+  class="icon-btn {size} {variant}"
   {type}
   disabled={disabled || loading}
   aria-busy={loading}
@@ -86,6 +91,14 @@
     color: var(--color-accent);
     border-color: var(--color-accent);
     background: var(--color-surface-hover);
+  }
+
+  /* Destructive action (e.g. remove a step, revoke a session) — same shape, danger tokens instead of
+     the accent ones, consistent with `Button`'s `danger` variant. */
+  .icon-btn.danger:hover:not(:disabled) {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+    background: var(--color-danger-soft);
   }
 
   .icon-btn:focus-visible {

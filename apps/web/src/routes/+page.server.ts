@@ -5,6 +5,7 @@ import { CONDITION_WINDOW_DAYS, loadInsights } from '$modules/insights/insights.
 import { loadTimeline } from '$modules/timeline/timeline.api';
 import { loadJournal } from '$modules/journal/journal.api';
 import { loadRange } from '$lib/server/range-context';
+import { capRange } from '$lib/range';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
   // The guard (`hooks.server.ts`) has already redirected any unauthenticated or pre-onboarding
@@ -30,14 +31,16 @@ export const load: PageServerLoad = async ({ locals, url }) => {
       { range, locale: locals.locale }
     ),
     /*
-     * NOT range-driven, deliberately. This read feeds the condition block ("how am I right now") and
-     * the timeline's anomaly markers, both of which compare today against a recent baseline. Widening
-     * that baseline to a year would answer a different question — so the condition card carries no
-     * range badge either (spec 047).
+     * Follows the range switch for 7/14/30, but never wider (spec 095): this read feeds the condition
+     * block ("how am I right now") and the timeline's anomaly markers, both of which compare today
+     * against a recent baseline, and a year-long ("365"/"all") mean would answer a different question.
+     * `capRange` keeps the switch's shape below the ceiling and clamps above it — so the condition
+     * card carries no range badge of its own (spec 047), but the "vs" numbers do move with 7 vs 14 vs
+     * 30, which is the whole point of the switch being visible on this page at all.
      */
     loadInsights(
       { garmin, clock: container.clock, timeZone: container.config.appTimeZone },
-      { window: CONDITION_WINDOW_DAYS, locale: locals.locale }
+      { range: capRange(range, CONDITION_WINDOW_DAYS), locale: locals.locale }
     )
   ]);
 

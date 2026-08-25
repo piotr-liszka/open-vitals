@@ -10,6 +10,7 @@
   import { formatDay, formatMonth, addMonths, type DayKey, type MonthKey } from '$lib/date';
   import { monthWeeks } from './planner';
   import { getI18n, type MessageKey } from '$lib/i18n';
+  import IconButton from '$lib/ui/IconButton.svelte';
 
   const i18n = getI18n();
 
@@ -91,19 +92,19 @@
 
 <div class="cal">
   <div class="bar">
-    <button
-      type="button"
-      class="nav"
-      aria-label={i18n.t('workout.calendar.prevMonth')}
-      onclick={() => onmonth(addMonths(month, -1))}>←</button
-    >
+    <IconButton
+      icon="chevron-left"
+      size="sm"
+      label={i18n.t('workout.calendar.prevMonth')}
+      onclick={() => onmonth(addMonths(month, -1))}
+    />
     <h3 class="month">{formatMonth(i18n.locale, month, 'longYear')}</h3>
-    <button
-      type="button"
-      class="nav"
-      aria-label={i18n.t('workout.calendar.nextMonth')}
-      onclick={() => onmonth(addMonths(month, 1))}>→</button
-    >
+    <IconButton
+      icon="chevron-right"
+      size="sm"
+      label={i18n.t('workout.calendar.nextMonth')}
+      onclick={() => onmonth(addMonths(month, 1))}
+    />
   </div>
 
   <table class="grid">
@@ -196,24 +197,6 @@
     color: var(--color-text);
     text-transform: capitalize;
   }
-  .nav {
-    width: var(--space-8);
-    height: var(--space-8);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text-muted);
-    cursor: pointer;
-  }
-  .nav:hover {
-    color: var(--color-text);
-    border-color: var(--color-border-strong);
-  }
-  .nav:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
   .grid {
     width: 100%;
     border-collapse: collapse;

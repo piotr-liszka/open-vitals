@@ -1,19 +1,19 @@
 /**
- * Readout sizing for `StatTile` (specs 029 + 031).
+ * Readout sizing for `StatTile` (spec 029, revised spec 040).
  *
  * The hero readout is `--readout-xl` (up to 48px) and never wraps, which is right for `11 238` and
  * wrong for `6 h 52 min`: the same tile that fits a step count spills a duration past its own border.
  * The step therefore follows the LENGTH of the rendered string, so a long value shrinks instead of
  * escaping the tile.
  *
- * Length alone is not enough, though, because the same string is roomy in a 250px dashboard tile and
- * impossible in a 118px activity-detail tile — the readout tokens scale with the VIEWPORT while
- * `auto-fit` grids spend extra width on more columns. So the step above is paired with a *fit scale*
- * (spec 031): the reciprocal of the readout's width in em, which lets the component's CSS size the type
- * against the tile's own width in `cqw`. `min(token, 100cqw × scale)` then means "hero size unless the
- * tile is too narrow for it".
+ * This is deliberately the ONLY sizing input StatTile derives per-value. An earlier revision (spec 031)
+ * paired it with a continuous, per-glyph "fit scale" driven by the tile's own container width — which
+ * meant two values of the same length could render at visibly different sizes in the same grid, because
+ * their exact characters (e.g. digits vs punctuation) advanced by different amounts. That read as broken,
+ * not "fitted" (spec 040), so it was removed: the tile's own narrow-column fallback now lives in
+ * `StatTile.svelte`'s CSS as fixed, width-only container-query steps, not JS-computed per-value scales.
  *
- * Kept DOM-free so the rules are unit-tested once rather than eyeballed per page, and so they produce the
+ * Kept DOM-free so the rule is unit-tested once rather than eyeballed per page, and so it produces the
  * same result on the server and in the browser (no measurement, no hydration mismatch).
  */
 
@@ -47,73 +47,4 @@ export function readoutStep(value: string | number, unit?: string): ReadoutStep 
     if (length <= max) return step;
   }
   return 'sm';
-}
-
-/*
-  Advance widths as a fraction of the font size. Measured in the browser against the shipped stack
-  (Inter → system-ui) at the weights and tracking the tile actually uses, then rounded up a little: the
-  model has to stay on the conservative side, with `.readout { overflow: hidden }` as the hard boundary.
-*/
-
-/** One `--font-black` readout glyph — tabular digits and caps measure ~0.65em at `--tracking-tight`. */
-const VALUE_CHAR_EM = 0.67;
-/** Punctuation and spaces inside a readout ("6,11", "1:34:50", "1 234") are barely half that. */
-const NARROW_CHAR_EM = 0.3;
-// Escaped on purpose: the spaces are the no-break (U+00A0) and thin (U+2009/U+202F) ones `Intl`
-// puts in grouped numbers, and an invisible literal in a source file is a trap.
-const NARROW_CHARS = new Set([
-  ' ',
-  '\u00a0',
-  '\u2009',
-  '\u202f',
-  ',',
-  '.',
-  ':',
-  '/',
-  '-',
-  "'",
-  '\u2019',
-  '|'
-]);
-/** One `--font-semibold` unit glyph at the unit's own size ("bpm" measures 0.68em, "W" 0.95em). */
-const UNIT_CHAR_EM = 0.72;
-/** The unit renders at this fraction of the value's size — see `.unit` in `StatTile`. */
-const UNIT_SIZE_RATIO = 0.45;
-/** One uppercase micro-caps label glyph, `--tracking-widest` included (measured ~0.82em). */
-const LABEL_CHAR_EM = 0.84;
-
-/** Width of a string in em at the given per-glyph advance, with narrow glyphs charged less. */
-function advanceEm(text: string, charEm: number): number {
-  let em = 0;
-  for (const char of text) em += NARROW_CHARS.has(char) ? NARROW_CHAR_EM : charEm;
-  return em;
-}
-
-/** Scales are only ever consumed as `calc(100cqw * scale)`; four decimals is well past pixel-accurate. */
-function scaleFor(widthEm: number): number {
-  return widthEm > 0 ? Math.round((1 / widthEm) * 10_000) / 10_000 : 1;
-}
-
-/**
- * Reciprocal of the width, in em, that a readout needs for its value and unit side by side — i.e. the
- * font size at which the pair exactly fills one em of available width. CSS multiplies it by the tile's
- * width (`100cqw`) to get the largest size that still fits, and caps that with the step token.
- */
-export function readoutFitScale(value: string | number, unit?: string): number {
-  const valueEm = advanceEm(String(value), VALUE_CHAR_EM);
-  const unitEm = advanceEm(unit ?? '', UNIT_CHAR_EM) * UNIT_SIZE_RATIO;
-  return scaleFor(valueEm + unitEm);
-}
-
-/**
- * Same idea for the tile's micro-caps label, sized off its LONGEST WORD: a label with spaces already has
- * wrap opportunities and keeps its size, while a single unbreakable word (`PRZEWYŻSZENIE`) is the case
- * that used to run past the tile border.
- */
-export function labelFitScale(label: string): number {
-  let longest = 0;
-  for (const word of String(label).split(/\s+/)) {
-    if (word.length > longest) longest = word.length;
-  }
-  return scaleFor(longest * LABEL_CHAR_EM);
 }

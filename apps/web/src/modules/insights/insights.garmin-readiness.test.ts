@@ -3,6 +3,8 @@ import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 import { createTranslator } from '$lib/i18n';
 import { fmtRecovery } from './condition.format';
 import {
+  garminDetailClause,
+  garminHeadline,
   garminSummary,
   isHrvUnbalanced,
   latestTrainingReadiness,
@@ -240,6 +242,46 @@ describe('garminSummary', () => {
 
   it('still ends in a full stop with nothing to add', () => {
     expect(garminSummary(t, 'moderate', null, [])).toBe('Garmin: gotowość umiarkowana.');
+  });
+});
+
+describe('garminHeadline / garminDetailClause (spec 095)', () => {
+  it('is just the level clause when the reading is current', () => {
+    expect(garminHeadline(t, 'prime')).toBe('Garmin: gotowość szczytowa');
+    expect(garminHeadline(t, 'prime', { day: '2026-08-16', days: 0 })).toBe('Garmin: gotowość szczytowa');
+  });
+
+  it('appends the staleness suffix once the reading is old', () => {
+    expect(garminHeadline(t, 'prime', { day: '2026-08-14', days: 2 })).toBe(
+      'Garmin: gotowość szczytowa (nieaktualne)'
+    );
+  });
+
+  it('carries the shared clauses without ever mentioning the recovery timer', () => {
+    expect(garminDetailClause(t, ['HRV poniżej bazy (88 ms)', 'sen 7 h 24 min'])).toBe(
+      'HRV poniżej bazy (88 ms), sen 7 h 24 min'
+    );
+  });
+
+  it('is null when there is nothing left to say once the timer is set aside', () => {
+    expect(garminDetailClause(t, [])).toBeNull();
+    expect(garminDetailClause(t, [], { day: '2026-08-16', days: 0 })).toBeNull();
+  });
+
+  it('leads a stale reading with "data from", ahead of the shared clauses', () => {
+    expect(garminDetailClause(t, ['sen 7 h 24 min'], { day: '2026-08-14', days: 2 })).toBe(
+      'dane z 14 sie, sen 7 h 24 min'
+    );
+  });
+
+  it('together reproduce garminSummary minus the recovery clause', () => {
+    const stale = { day: '2026-08-14', days: 2 };
+    const clauses = ['HRV poniżej bazy (88 ms)', 'sen 7 h 24 min'];
+    const headline = garminHeadline(t, 'low', stale);
+    const detail = garminDetailClause(t, clauses, stale);
+    expect(`${headline} — ${detail}.`).toBe(
+      'Garmin: gotowość niska (nieaktualne) — dane z 14 sie, HRV poniżej bazy (88 ms), sen 7 h 24 min.'
+    );
   });
 });
 

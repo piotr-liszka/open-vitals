@@ -476,6 +476,43 @@ export function garminSummary(
   return parts.length === 0 ? `${head}.` : `${head} — ${parts.join(', ')}.`;
 }
 
+/**
+ * The headline alone — `garminSummary`'s `head`, with its "(stan na ten dzień)" suffix already
+ * applied when stale. Exposed separately so a card can lead with it without re-deriving the
+ * staleness check.
+ */
+export function garminHeadline(
+  t: Translator,
+  level: GarminReadinessLevel,
+  stale: { day: string; days: number } | null = null
+): string {
+  const isStale = stale !== null && stale.days > 0 && isDayKey(stale.day);
+  return isStale ? `${t(LEVEL_HEAD[level])} (${t('garminReadiness.stale')})` : t(LEVEL_HEAD[level]);
+}
+
+/**
+ * `garminSummary`'s clauses minus the recovery timer — the staleness "data from" clause, if any,
+ * then whatever channel/sleep clauses the caller assembled, comma-joined. `null` when there is
+ * nothing left to say once the timer is set aside.
+ *
+ * Split out of `garminSummary` for a card that already shows the countdown on its own (a ticking
+ * pill): without this, "fully recovered, per Garmin" right above the sentence's own "recovery
+ * complete" said the same fact twice in two different phrasings.
+ */
+export function garminDetailClause(
+  t: Translator,
+  clauses: readonly string[],
+  stale: { day: string; days: number } | null = null
+): string | null {
+  const isStale = stale !== null && stale.days > 0 && isDayKey(stale.day);
+  const parts: string[] = [];
+  if (isStale) {
+    parts.push(t('garminReadiness.dataFrom', { day: formatDay(t.locale, stale.day as DayKey) }));
+  }
+  parts.push(...clauses);
+  return parts.length > 0 ? parts.join(', ') : null;
+}
+
 /** Assemble the contract object the card consumes. */
 export function toGarminReadiness(
   t: Translator,
@@ -485,6 +522,7 @@ export function toGarminReadiness(
   nowMs: number | null = null
 ): GarminReadiness {
   const staleDays = stalenessOf(parsed.day, today);
+  const stale = { day: parsed.day, days: staleDays };
   return {
     day: parsed.day,
     staleDays,
@@ -494,13 +532,8 @@ export function toGarminReadiness(
     factors: parsed.factors,
     hrvWeeklyAvg: parsed.hrvWeeklyAvg,
     acuteLoad: parsed.acuteLoad,
-    summary: garminSummary(
-      t,
-      parsed.level,
-      parsed.recovery,
-      clauses,
-      { day: parsed.day, days: staleDays },
-      nowMs
-    )
+    summary: garminSummary(t, parsed.level, parsed.recovery, clauses, stale, nowMs),
+    headline: garminHeadline(t, parsed.level, stale),
+    detailClause: garminDetailClause(t, clauses, stale)
   };
 }

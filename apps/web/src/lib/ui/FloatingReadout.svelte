@@ -89,9 +89,10 @@
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg);
-    /* One strip, never a panel: overflow scrolls sideways rather than stacking rows. */
+    /* The bar is inert (`pointer-events: none` throughout) so nothing in it can ever be scrolled
+       into view — a metric that didn't fit on one line used to be clipped and simply unreachable.
+       It wraps onto further rows instead, so every metric stays visible whatever the count. */
     max-width: 100%;
-    overflow: hidden;
   }
 
   .at {
@@ -119,17 +120,11 @@
     margin: 0;
     padding: 0;
     display: flex;
-    flex-wrap: nowrap;
-    gap: var(--space-5);
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
     min-width: 0;
-    overflow-x: auto;
-    /* Nothing here is clickable, so a scrollbar would only be chrome over the charts. */
-    scrollbar-width: none;
     border-left: 1px solid var(--color-border);
     padding-left: var(--space-4);
-  }
-  .values::-webkit-scrollbar {
-    display: none;
   }
 
   .values li {

@@ -187,7 +187,7 @@
   --color-accent-hover: var(--magenta-600);
   --color-accent-soft: color-mix(in srgb, var(--magenta-500) 15%, transparent);
   --color-accent-line: color-mix(in srgb, var(--magenta-500) 60%, transparent);
-  --color-on-accent: var(--ink-950); /* ink on magenta — bold + AA legible */
+  --color-on-accent: #760947; /* ink on magenta — bold + AA legible */
 
   /*
     The accent has two jobs and they want different steps.

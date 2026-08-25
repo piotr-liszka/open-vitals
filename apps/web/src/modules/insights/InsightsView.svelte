@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { Card, Badge, Banner, StatTile, TrendChart, RangeBadge, Skeleton } from '$lib/ui';
+  import { Card, Badge, Banner, Icon, StatTile, TrendChart, RangeBadge, Skeleton } from '$lib/ui';
   import { formatDay } from '$lib/date';
   import { bucketAxisLabel, bucketNounKey } from '$lib/series';
   import type { ResolvedRange } from '$lib/range';
-  import ReadinessCard from './ReadinessCard.svelte';
-  import type { CorrelationStrength, InsightsData, MetricChart, MetricFormat, Trend } from './insights.types';
+  import type { Anomaly, CorrelationStrength, InsightsData, MetricChart, MetricFormat, Trend } from './insights.types';
   import { formatDecimals, formatInteger, getI18n, type MessageKey } from '$lib/i18n';
   import { rangeLabel } from '$lib/range';
 
@@ -60,6 +59,25 @@
 
   // Day keys are calendar days — `formatDay` renders them without timezone drift (spec 018).
   const fmtDate = (key: string): string => formatDay(i18n.locale, key, 'short');
+
+  /**
+   * Full sentence for one anomaly, kept for screen readers and the row's hover title. The row itself
+   * only shows the metric, date, value and deviation inline — this is where the "moderate/strong
+   * deviation from your N-day baseline" framing still lives (see anomaly-row below).
+   */
+  function anomalyDescription(a: Anomaly): string {
+    const heading = i18n.t(a.direction === 'up' ? 'insights.anomalyTitleHigh' : 'insights.anomalyTitleLow', {
+      label: a.label,
+      date: fmtDate(a.date)
+    });
+    const body = i18n.t('insights.anomalyBody', {
+      value: fmt(a.value, formatByKey.get(a.key) ?? 'int'),
+      sd: formatDecimals(i18n.locale, Math.abs(a.z), 1),
+      days: String(data.window),
+      severity: i18n.t(SEVERITY_LABEL[a.severity])
+    });
+    return `${heading}. ${body}`;
+  }
 
   /** Reconstruct the "healthy direction" so StatTile colours an oriented trend correctly. */
   function trendGoodWhen(t: Trend): 'up' | 'down' | undefined {
@@ -140,8 +158,6 @@
       <a class="link" href="/">{i18n.t('insights.connectCta')}</a>
     </Card>
   {:else}
-    <ReadinessCard readiness={data.readiness} connected={data.connected} />
-
     <section aria-label={i18n.t('insights.trends')}>
       <h3 class="section-title">{i18n.t('insights.trends')}</h3>
       {#if data.trends.length === 0}
@@ -170,22 +186,33 @@
           >{i18n.t('insights.nothingUnusualBody')}</Banner
         >
       {:else}
-        <div class="anomaly-list">
+        <!--
+          One dense line per anomaly rather than a full title+body Banner each — with several
+          anomalies flagged the old layout could run this section taller than the whole page above it.
+          The full "N SD from your M-day baseline" sentence survives as the row's title/aria-label, not
+          lost, just no longer spelled out on screen.
+        -->
+        <div class="anomaly-panel">
           {#each data.anomalies as a (a.key + a.date)}
-            <Banner
-              tone={a.severity === 'strong' ? 'warning' : 'info'}
-              title={i18n.t(a.direction === 'up' ? 'insights.anomalyTitleHigh' : 'insights.anomalyTitleLow', {
-                label: a.label,
-                date: fmtDate(a.date)
-              })}
+            <div
+              class="anomaly-row {a.severity}"
+              title={anomalyDescription(a)}
+              aria-label={anomalyDescription(a)}
             >
-              {i18n.t('insights.anomalyBody', {
-                value: fmt(a.value, formatByKey.get(a.key) ?? 'int'),
-                sd: formatDecimals(i18n.locale, Math.abs(a.z), 1),
-                days: String(data.window),
-                severity: i18n.t(SEVERITY_LABEL[a.severity])
-              })}
-            </Banner>
+              <span class="anomaly-icon" aria-hidden="true">
+                <Icon name={a.direction === 'up' ? 'arrow-up' : 'arrow-down'} size={14} />
+              </span>
+              <span class="anomaly-main" aria-hidden="true">
+                <span class="anomaly-label">{a.label}</span>
+                <span class="anomaly-date">{fmtDate(a.date)}</span>
+              </span>
+              <span class="anomaly-value" aria-hidden="true"
+                >{fmt(a.value, formatByKey.get(a.key) ?? 'int')}</span
+              >
+              <span class="anomaly-sd" aria-hidden="true"
+                >{i18n.t('insights.anomalySd', { sd: formatDecimals(i18n.locale, Math.abs(a.z), 1) })}</span
+              >
+            </div>
           {/each}
         </div>
       {/if}
@@ -334,10 +361,83 @@
     }
   }
 
-  .anomaly-list {
+  /* One hairline-divided row per anomaly rather than a stack of full Banners — the whole section now
+     reads at a glance instead of running taller than a screen once there are more than two or three
+     flagged days. */
+  .anomaly-panel {
     display: flex;
     flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .anomaly-row {
+    display: flex;
+    align-items: baseline;
     gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .anomaly-row:last-child {
+    border-bottom: none;
+  }
+
+  .anomaly-icon {
+    display: inline-flex;
+    align-self: center;
+    flex-shrink: 0;
+    color: var(--color-info);
+  }
+  .anomaly-row.strong .anomaly-icon {
+    color: var(--color-warning);
+  }
+
+  .anomaly-main {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    min-width: 0;
+    flex: 1;
+  }
+  .anomaly-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .anomaly-date {
+    font-size: var(--text-xs);
+    color: var(--color-text-subtle);
+    white-space: nowrap;
+  }
+
+  .anomaly-value {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    font-feature-settings: var(--numeric);
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+
+  .anomaly-sd {
+    font-size: var(--text-xs);
+    font-feature-settings: var(--numeric);
+    color: var(--color-text-subtle);
+    white-space: nowrap;
+  }
+  .anomaly-row.strong .anomaly-sd {
+    color: var(--color-warning);
+  }
+
+  @media (max-width: 560px) {
+    .anomaly-date {
+      display: none;
+    }
   }
 
   .corr-grid {

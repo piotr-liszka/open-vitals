@@ -127,11 +127,17 @@
   /** The badge follows our own snapshot; Garmin's level no longer drives the header. */
   const activeState = $derived<RecoveryState>(condition?.state ?? 'unknown');
   /*
-   * The sentence still comes from Garmin's side when Garmin scored the day: it names the recovery
-   * timer and its change phrase, which are facts about the body rather than about a scoring method,
-   * and the channel clauses inside it are the same either way (`summaryClauses`).
+   * The sentence still comes from Garmin's side when Garmin scored the day: the channel clauses
+   * inside it are the same either way (`summaryClauses`). The recovery timer is DELIBERATELY left
+   * out here (spec 095): the `.recovery` pill right above already shows it — ticking, with its own
+   * absolute end time — so repeating it in the sentence too ("fully recovered, per Garmin" then
+   * "recovery complete") said the same fact twice in two different phrasings. `garmin.summary`
+   * itself is untouched and still carries the timer, for the one caller that has no pill beside it.
    */
-  const activeSummary = $derived(garmin?.summary ?? condition?.summary ?? '');
+  const activeSummary = $derived.by(() => {
+    if (garmin === null) return condition?.summary ?? '';
+    return garmin.detailClause ? `${garmin.headline} — ${garmin.detailClause}.` : `${garmin.headline}.`;
+  });
 
   /**
    * Body Battery's last 24 hours, drawn beside the gauge (specs 051, 052). The channel list states the
@@ -386,7 +392,9 @@
               <span class="block-icon" style="color: var(--lane-green)"><Icon name="pulse" size={16} /></span>
               {i18n.t('condition.channelsTitle')}
             </h4>
-            <span class="block-meta">{i18n.t('condition.channelsSubtitle')}</span>
+            <span class="block-meta">
+              {i18n.t('condition.channelsSubtitle', { days: condition.windowDays })}
+            </span>
           </div>
 
           <ul class="channels">

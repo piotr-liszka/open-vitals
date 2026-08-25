@@ -155,6 +155,18 @@ export function resolveRange(key: RangeKey, today: DayKey, earliest: DayKey | nu
   };
 }
 
+/**
+ * Narrow a resolved range to at most `maxDays`, keeping its `end`. For a reader that wants the range
+ * switch's shape — 7d and 14d each move on their own — but refuses to let "365" or "cały czas" widen
+ * its own baseline past a sane ceiling (the condition card's channels, spec 095: comparing today
+ * against a year-long mean answers a different question than comparing it against a recent one).
+ */
+export function capRange(range: ResolvedRange, maxDays: number): ResolvedRange {
+  if (range.days <= maxDays) return range;
+  const start = addDays(range.end, -(maxDays - 1));
+  return { ...range, start, days: maxDays, bucket: bucketFor(maxDays) };
+}
+
 /** Never let a window reach further back than `MAX_RANGE_DAYS` before `today`. */
 function clampFloor(start: DayKey, today: DayKey): DayKey {
   const floor = addDays(today, -(MAX_RANGE_DAYS - 1));

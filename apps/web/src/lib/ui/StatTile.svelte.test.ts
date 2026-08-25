@@ -1,7 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
 import StatTile from './StatTile.svelte';
-import { readoutFitScale } from './readout-fit';
 
 afterEach(cleanup);
 
@@ -61,41 +60,33 @@ describe('StatTile', () => {
     expect(short.container.querySelector('.readout')?.classList.contains('step-xl')).toBe(true);
   });
 
-  it('publishes the tile-width fit scales the readout and label are sized with', () => {
-    // The tile is an inline-size container; these two numbers are what its CSS multiplies 100cqw by,
-    // so a 118px activity-detail column shrinks the type instead of overlapping it (spec 031).
-    const { container } = render(StatTile, {
-      props: { label: 'Przewyższenie', value: '6,11', unit: 'km', accent: 'green' }
-    });
-    const style = container.querySelector('.tile')?.getAttribute('style') ?? '';
-    const readoutScale = Number(/--readout-scale:\s*([\d.]+)/.exec(style)?.[1]);
-    const labelScale = Number(/--label-scale:\s*([\d.]+)/.exec(style)?.[1]);
+  it('renders two values of the same readout step identically, whatever their exact characters', () => {
+    // The bug this guards against (spec 040): a duration ("30:26") and a decimal ("4.94") of the same
+    // rendered length used to size differently because a per-glyph fit scale weighted their punctuation
+    // differently. StatTile no longer computes a per-value scale at all — same step, same `.readout`
+    // class, same size.
+    const a = render(StatTile, { props: { label: 'Czas w ruchu', value: '30:26' } });
+    const stepA = a.container.querySelector('.readout')?.className;
+    cleanup();
 
-    // At 118px of usable width both land under their tokens (48px readout, 12px micro-caps).
-    expect(118 * readoutScale).toBeLessThan(48);
-    expect((118 - 16) * labelScale).toBeLessThan(12);
-    // ...and a roomy dashboard tile leaves the hero token in charge.
-    expect(250 * readoutScale).toBeGreaterThan(48);
+    const b = render(StatTile, { props: { label: 'Dystans', value: '4.94' } });
+    const stepB = b.container.querySelector('.readout')?.className;
+
+    expect(stepA).toBe(stepB);
   });
 
-  it('drops the unit from the fit when the tile is muted, since none is drawn', () => {
-    const { container } = render(StatTile, {
-      props: { label: 'SpO2', value: '—', unit: '%', muted: true }
-    });
-    const style = container.querySelector('.tile')?.getAttribute('style') ?? '';
-    expect(style).toContain(`--readout-scale: ${readoutFitScale('—')}`);
-    expect(readoutFitScale('—')).toBeGreaterThan(readoutFitScale('—', '%'));
-  });
-
-  it('shows a lane accent marker only when an accent is given', () => {
+  it('gives the tile card an accent border and glow instead of a marker dot, only when accented', () => {
     const plain = render(StatTile, { props: { label: 'Score', value: 84 } });
     expect(plain.container.querySelector('.marker')).toBeNull();
+    expect(plain.container.querySelector('.tile')?.classList.contains('has-accent')).toBe(false);
     cleanup();
 
     const accented = render(StatTile, {
       props: { label: 'Steps', value: 9204, accent: 'orange' }
     });
-    expect(accented.container.querySelector('.marker')).not.toBeNull();
-    expect(accented.container.querySelector('.tile')?.getAttribute('style')).toContain('var(--lane-orange)');
+    expect(accented.container.querySelector('.marker')).toBeNull();
+    const tile = accented.container.querySelector('.tile');
+    expect(tile?.classList.contains('has-accent')).toBe(true);
+    expect(tile?.getAttribute('style')).toContain('var(--lane-orange)');
   });
 });

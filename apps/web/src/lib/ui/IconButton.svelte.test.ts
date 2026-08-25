@@ -48,4 +48,18 @@ describe('IconButton', () => {
     });
     expect(container.querySelector('button')?.classList.contains('sm')).toBe(true);
   });
+
+  it('defaults to the neutral variant', () => {
+    const { container } = render(IconButton, { props: { icon: 'trash', label: 'Usuń' } });
+    const button = container.querySelector('button');
+    expect(button?.classList.contains('default')).toBe(true);
+    expect(button?.classList.contains('danger')).toBe(false);
+  });
+
+  it('carries the danger variant class for a destructive action', () => {
+    const { container } = render(IconButton, {
+      props: { icon: 'trash', label: 'Usuń', variant: 'danger' }
+    });
+    expect(container.querySelector('button')?.classList.contains('danger')).toBe(true);
+  });
 });

@@ -995,6 +995,9 @@ export const en: Catalog = {
   'streams.axis.distance': 'Distance',
   'streams.axisAriaLabel': "Charts' horizontal axis",
   'streams.hint': 'Hover any chart — the same moment is marked on all of them. Click to pin it in place.',
+  'streams.viewMode.stacked': 'One by one',
+  'streams.viewMode.combined': 'All in one',
+  'streams.viewModeAriaLabel': 'Chart layout',
 
   /* ---- activity-charts.ts: chart specs passed as props into TrendChart ---- */
   'chart.section.effort': 'Effort',
@@ -1434,6 +1437,7 @@ export const en: Catalog = {
   'insights.anomalyTitleHigh': '{label}: unusually high {date}',
   'insights.anomalyTitleLow': '{label}: unusually low {date}',
   'insights.anomalyBody': 'Reading {value} — {sd} SD from your {days}-day baseline ({severity} deviation).',
+  'insights.anomalySd': '±{sd} SD',
   'insights.correlationMeta': 'r = {r} · {days} days',
   'insights.correlationHigher': 'More “{a}” usually comes with higher “{b}”.',
   'insights.correlationLower': 'More “{a}” usually comes with lower “{b}”.',
@@ -1493,8 +1497,6 @@ export const en: Catalog = {
 
   'readiness.title': 'Readiness',
   'readiness.subtitle': 'How ready you are to train today, and when you will be back at full strength',
-  'readiness.notConnected': 'Connect your Garmin account to see your readiness.',
-  'readiness.connectCta': 'Connect on the dashboard →',
   'readiness.notEnabled': 'Readiness uses your multi-day metrics. Turn on advanced mode to run it.',
   'readiness.notEnoughData': 'Not enough data — sync your watch and come back in a few days.',
   'readiness.driversAriaLabel': 'Readiness drivers',
@@ -1534,7 +1536,8 @@ export const en: Catalog = {
     'The session ran {pct}% harder than the plan asked for ({metric}) — next time stay inside the planned range.',
   'plan.takeaway.easier':
     'The session ran {pct}% easier than the plan asked for ({metric}) — next time stay inside the planned range.',
-  'plan.strip.title': 'Planned structure',
+  'plan.strip.title': 'Workout structure',
+  'plan.strip.plannedLabel': 'Planned',
   'plan.strip.ariaLabel': 'Planned session structure on the elapsed-time axis',
   'plan.strip.note': 'Planned blocks on the same time axis as the charts below.',
   'plan.stepKind.warmup': 'Warm-up',
@@ -2020,7 +2023,7 @@ export const en: Catalog = {
   'condition.stage.awake': 'Awake',
   'condition.sleepStagesAriaLabel': 'Sleep stages',
   'condition.channelsTitle': 'Recovery channels',
-  'condition.channelsSubtitle': 'against your baseline from recent days',
+  'condition.channelsSubtitle': 'vs your last {days} days',
   'condition.channelDelta': '{delta} vs {baseline}',
   'condition.batteryPeriod': 'last 24 hours',
   'condition.staleBanner':

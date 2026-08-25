@@ -223,6 +223,87 @@ describe('ActivityStreamsPanel', () => {
       expect(container.querySelector('.tip')).toBeNull();
       expect(container.querySelector('.values')).not.toBeNull();
     });
+
+    it('clears a pinned moment on a click outside the panel, not just on Escape', async () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      pinWidths(container);
+      const hit = container.querySelectorAll('rect.hit')[0]!;
+
+      pointer(hit, 'pointermove', 300);
+      pointer(hit, 'pointerup', 300);
+      await Promise.resolve();
+      expect(cursors(container)).toHaveLength(4);
+      expect(container.querySelector('.values')).not.toBeNull();
+
+      // Outside the panel entirely — a click on the document body.
+      document.body.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      await Promise.resolve();
+      expect(cursors(container)).toHaveLength(0);
+      expect(container.querySelector('.values')).toBeNull();
+      expect(container.querySelector('.hint')).not.toBeNull();
+    });
+
+    it('does not clear the pin for a pointerdown inside the panel itself', async () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      pinWidths(container);
+      const hit = container.querySelectorAll('rect.hit')[0]!;
+
+      pointer(hit, 'pointermove', 300);
+      pointer(hit, 'pointerup', 300);
+      await Promise.resolve();
+
+      pointer(hit, 'pointerdown', 300);
+      await Promise.resolve();
+      expect(cursors(container)).toHaveLength(4);
+    });
+  });
+
+  describe("one chart per metric, or all a group's metrics overlaid on one (view-mode switch)", () => {
+    it('draws one chart row per metric by default', () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      expect(container.querySelectorAll('.chart-row')).toHaveLength(4);
+    });
+
+    it('collapses each group to one overlaid chart in "All in one", with a legend to toggle metrics', async () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      const combinedBtn = [...container.querySelectorAll('button')].find(
+        (b) => b.textContent?.trim() === 'Razem'
+      );
+      combinedBtn!.click();
+      await Promise.resolve();
+
+      // Wysiłek (2 metrics), Teren i warunki (1) and Fizjologia (1) — one overlaid chart each.
+      expect(container.querySelectorAll('.chart-row')).toHaveLength(3);
+      expect(container.querySelectorAll('svg')).toHaveLength(3);
+      expect(container.querySelectorAll('.legend')).not.toHaveLength(0);
+    });
+
+    it('switches back to one-chart-per-metric from "One by one"', async () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      const combinedBtn = [...container.querySelectorAll('button')].find(
+        (b) => b.textContent?.trim() === 'Razem'
+      );
+      combinedBtn!.click();
+      await Promise.resolve();
+      expect(container.querySelectorAll('.chart-row')).toHaveLength(3);
+
+      const stackedBtn = [...container.querySelectorAll('button')].find(
+        (b) => b.textContent?.trim() === 'Pojedynczo'
+      );
+      stackedBtn!.click();
+      await Promise.resolve();
+      expect(container.querySelectorAll('.chart-row')).toHaveLength(4);
+    });
   });
 
   describe('the planned structure laid over the same axis (spec 085)', () => {
@@ -264,6 +345,28 @@ describe('ActivityStreamsPanel', () => {
         }
       });
       expect(container.querySelector('.plan-strip')).toBeNull();
+    });
+
+    it('titles the section "workout structure" with a separate "Planned" subsection', () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run', plannedStructure: structure }
+      });
+      expect(container.querySelector('.plan-strip > .group-title')?.textContent).toBe('Struktura treningu');
+      expect([...container.querySelectorAll('.plan-sub-label')].map((el) => el.textContent)).toEqual([
+        'Plan'
+      ]);
+    });
+
+    it('draws the shared crosshair on the plan strip too, once a moment is active', async () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run', plannedStructure: structure }
+      });
+      pinWidths(container);
+      expect(container.querySelectorAll('.cursor-line')).toHaveLength(0);
+
+      pointer(container.querySelectorAll('rect.hit')[0]!, 'pointermove', 300);
+      await Promise.resolve();
+      expect(container.querySelectorAll('.cursor-line')).toHaveLength(1);
     });
 
     it('draws one block per planned step, in order, above the charts', () => {
@@ -339,6 +442,10 @@ describe('ActivityStreamsPanel', () => {
       const strips = container.querySelectorAll('.strip');
       expect(strips).toHaveLength(2);
       expect(container.textContent).toContain('Wykonanie');
+      expect([...container.querySelectorAll('.plan-sub-label')].map((el) => el.textContent)).toEqual([
+        'Plan',
+        'Wykonanie'
+      ]);
       // The lower row starts each block where the laps say it started, not where the plan did.
       const executed = [...strips[1]!.querySelectorAll<HTMLElement>('.timeline-segment')];
       expect(executed.map((el) => el.textContent?.trim())).toEqual(['Rozgrzewka', 'Praca', 'Schłodzenie']);

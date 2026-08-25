@@ -38,9 +38,26 @@
     /** Right inset in px, mirroring the chart's own right pad. */
     insetRight?: number;
     ariaLabel: string;
+    /**
+     * The chart stack's shared active moment, as a fraction of the strip, 0–1. `null`/absent draws no
+     * line — kept in the same units as `segments` so a caller can hand it the identical fraction it
+     * already computed for those, and the strip reads as one more lane under the same rule the charts
+     * draw, rather than a diagram that stops tracking the pointer at the chart's own edge.
+     */
+    cursor?: number | null;
+    /** Solid for a pinned moment, dashed for a live hover passing through — mirrors `TrendChart`'s cursor. */
+    cursorPinned?: boolean;
   }
 
-  let { segments, markers = [], insetLeft = 0, insetRight = 0, ariaLabel }: Props = $props();
+  let {
+    segments,
+    markers = [],
+    insetLeft = 0,
+    insetRight = 0,
+    ariaLabel,
+    cursor = null,
+    cursorPinned = false
+  }: Props = $props();
 
   const clamp = (n: number): number => (Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0);
 
@@ -71,6 +88,9 @@
         <span class="sr-only">{marker.label}</span>
       </li>
     {/each}
+    {#if cursor !== null}
+      <li class="cursor-line" class:pinned={cursorPinned} style="left: {pct(cursor)}" aria-hidden="true"></li>
+    {/if}
   </ul>
 </div>
 
@@ -127,6 +147,21 @@
     width: 2px;
     margin-left: -1px;
     background: var(--lane);
+  }
+
+  /* The chart stack's shared active moment, carried down onto the strip (spec 085 follow-up). Dashed
+     while a live hover passes through, solid once pinned — the same distinction `TrendChart` draws. */
+  .cursor-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 1px dashed var(--color-border-strong);
+    pointer-events: none;
+  }
+
+  .cursor-line.pinned {
+    border-left: 1px solid var(--color-accent-line);
   }
 
   .sr-only {

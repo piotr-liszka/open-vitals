@@ -367,6 +367,15 @@ export interface GarminReadiness {
   acuteLoad: number | null;
   /** One plain-Polish sentence for this source, mirroring `ConditionSnapshot.summary`. */
   summary: string;
+  /** The level clause alone (with its "(stan na ten dzień)" suffix already applied when stale). */
+  headline: string;
+  /**
+   * Everything `summary` says besides the headline and the recovery timer — the staleness "data
+   * from" clause, if any, plus the shared channel/sleep clauses, comma-joined. `null` when there is
+   * nothing to add. Split out so a card that already shows the recovery countdown on its own (a
+   * ticking pill) does not have to repeat it inside the sentence too.
+   */
+  detailClause: string | null;
 }
 
 /** "How am I right now" — the start page's opening answer. */
@@ -393,6 +402,12 @@ export interface ConditionSnapshot {
   state: RecoveryState;
   /** One plain-Polish sentence. Never medical advice. */
   summary: string;
+  /**
+   * How many days each channel's baseline is drawn from — the resolved condition window (7/14/30,
+   * capped independently of a wider global range). Lets the card say "vs your last {n} days" instead
+   * of a fixed, unstated span.
+   */
+  windowDays: number;
   /**
    * Garmin's own Training Readiness for the newest day it reported one (spec 059); null when the
    * account, device or day has none. The card can lead with either this or `readiness`.

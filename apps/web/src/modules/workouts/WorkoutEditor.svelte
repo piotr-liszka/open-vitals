@@ -23,6 +23,7 @@
   import Field from '$lib/ui/Field.svelte';
   import Input from '$lib/ui/Input.svelte';
   import Banner from '$lib/ui/Banner.svelte';
+  import IconButton from '$lib/ui/IconButton.svelte';
   import { SPORT_LABELS, sportLabel, sportGroup } from '$lib/sport-labels';
   import {
     WORKOUT_DURATION_TYPES,
@@ -346,24 +347,27 @@
         {/if}
 
         <div class="ctrl">
-          <button
-            type="button"
-            aria-label={i18n.t('workout.editor.moveUp')}
+          <IconButton
+            icon="arrow-up"
+            size="sm"
+            label={i18n.t('workout.editor.moveUp')}
             onclick={() => move(list, i, i - 1)}
-            disabled={i === 0}>↑</button
-          >
-          <button
-            type="button"
-            aria-label={i18n.t('workout.editor.moveDown')}
+            disabled={i === 0}
+          />
+          <IconButton
+            icon="arrow-down"
+            size="sm"
+            label={i18n.t('workout.editor.moveDown')}
             onclick={() => move(list, i, i + 1)}
-            disabled={i === list.length - 1}>↓</button
-          >
-          <button
-            type="button"
-            class="del"
-            aria-label={i18n.t('workout.editor.removeStep')}
-            onclick={() => removeAt(list, i)}>✕</button
-          >
+            disabled={i === list.length - 1}
+          />
+          <IconButton
+            icon="trash"
+            size="sm"
+            variant="danger"
+            label={i18n.t('workout.editor.removeStep')}
+            onclick={() => removeAt(list, i)}
+          />
         </div>
       </div>
     {/snippet}
@@ -539,32 +543,6 @@
     display: inline-flex;
     gap: var(--space-1);
     margin-left: auto;
-  }
-  .ctrl button {
-    min-width: 26px;
-    height: 26px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text-muted);
-    font-size: var(--text-xs);
-    cursor: pointer;
-  }
-  .ctrl button:hover:not(:disabled) {
-    color: var(--color-text);
-    border-color: var(--color-text-muted);
-  }
-  .ctrl button:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-  .ctrl button:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-  .ctrl .del:hover {
-    color: var(--color-danger);
-    border-color: var(--color-danger);
   }
   .adders {
     display: flex;

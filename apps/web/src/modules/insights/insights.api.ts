@@ -311,7 +311,8 @@ export async function loadInsights(
   const computed = computeInsights(seriesList, DEFAULT_INSIGHTS_CONFIG, readiness, t);
   const condition = computeCondition(t, seriesList, computed.readiness, today, {
     nowMs,
-    latestActivityStartMs
+    latestActivityStartMs,
+    windowDays: window
   });
 
   return { connected: true, window, start, end, ...computed, charts, condition };

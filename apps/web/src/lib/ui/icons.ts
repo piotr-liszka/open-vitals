@@ -32,6 +32,8 @@ export const ICON_NAMES = [
   'clock',
   'refresh',
   'chevron-down',
+  'chevron-left',
+  'chevron-right',
   'arrow-down',
   'arrow-up',
   'help',
@@ -181,6 +183,15 @@ export const ICONS: Readonly<Record<IconName, IconGlyph>> = {
   },
   'chevron-down': {
     paths: ['M6 9.5 12 15.5 18 9.5']
+  },
+  /* Prev/next paging (e.g. the workout planner's month nav) — the same bare chevron as
+     `chevron-down`, just turned to face sideways, so paging controls read as siblings of the
+     expand/collapse affordance rather than a different glyph family. */
+  'chevron-left': {
+    paths: ['M14.5 6 8.5 12 14.5 18']
+  },
+  'chevron-right': {
+    paths: ['M9.5 6 15.5 12 9.5 18']
   },
   /* Direction of change (spec 057). A full shaft, not a bare chevron: at 14 px inside a delta badge
      the arrow has to read as "which way did this move" on its own, without colour. */

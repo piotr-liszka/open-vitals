@@ -230,6 +230,11 @@
         <IconButton icon="refresh" label="Synchronizuj teraz" size="sm" />
         <IconButton icon="refresh" label="Synchronizacja w toku" loading />
         <IconButton icon="calendar" label="Kalendarz" disabled />
+        <!-- Prev/next paging — the calendar month nav (spec 066/040). -->
+        <IconButton icon="chevron-left" label="Poprzedni miesiąc" size="sm" />
+        <IconButton icon="chevron-right" label="Następny miesiąc" size="sm" />
+        <!-- Destructive action — same shape, danger tokens instead of accent (spec 040). -->
+        <IconButton icon="trash" label="Usuń krok" variant="danger" size="sm" />
       </div>
     </section>
 

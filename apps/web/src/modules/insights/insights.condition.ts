@@ -343,6 +343,13 @@ export interface ConditionOptions {
    * certainly made Garmin re-derive the timer, which stops the countdown (see `markSuperseded`).
    */
   latestActivityStartMs?: number | null;
+  /**
+   * How many days the caller actually fetched each channel's series over — the resolved condition
+   * window, so the card can say "vs your last {n} days" instead of a fixed, unstated span. Falls
+   * back to a series' own day count when omitted (the old fixed-30 behaviour, and what the many
+   * tests that never pass this still get).
+   */
+  windowDays?: number | null;
 }
 
 export function computeCondition(
@@ -405,6 +412,11 @@ export function computeCondition(
   const staleDays = day !== null && isDayKey(day) ? stalenessOf(day, today) : null;
   const stale = day !== null && staleDays !== null ? { day, days: staleDays } : null;
 
+  // The window every channel was actually fetched over, so "vs" can name it. Series carry one entry
+  // per requested day regardless of whether Garmin reported a value, so the longest one IS the
+  // window — falling back to it keeps this correct for the many tests that never pass `windowDays`.
+  const windowDays = opts.windowDays ?? series.reduce((max, s) => Math.max(max, s.days.length), 0);
+
   return {
     day,
     staleDays,
@@ -416,6 +428,7 @@ export function computeCondition(
     state,
     summary: conditionSummary(t, state, interpreted, sleep, stale),
     garmin: parsedGarmin ? toGarminReadiness(t, parsedGarmin, clauses, today, nowMs) : null,
-    recovery: parsedGarmin?.recovery ?? null
+    recovery: parsedGarmin?.recovery ?? null,
+    windowDays
   };
 }

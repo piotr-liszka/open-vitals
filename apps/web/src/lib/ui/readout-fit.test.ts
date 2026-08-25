@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { labelFitScale, readoutFitScale, readoutStep } from './readout-fit';
+import { readoutStep } from './readout-fit';
 
 describe('readoutStep', () => {
   it('keeps the hero size for short readouts', () => {
@@ -33,65 +33,11 @@ describe('readoutStep', () => {
     expect(readoutStep('')).toBe('xl');
     expect(readoutStep('—')).toBe('xl');
   });
-});
 
-/**
- * The scales are consumed as `calc(100cqw * scale)`, so a scale is asserted through the size it yields
- * at a given tile width — that is the property that has to hold, not the number itself.
- */
-describe('readoutFitScale', () => {
-  /** Usable width of one activity-detail hero tile at --container-max: ~118px. */
-  const NARROW = 118;
-  /** ...and of one dashboard tile in the 3-column grid. */
-  const WIDE = 250;
-  const sizeAt = (width: number, scale: number): number => width * scale;
-
-  it('leaves the hero token in charge in a wide tile', () => {
-    // 48px is --readout-xl's upper clamp: the container term must not undercut it here.
-    expect(sizeAt(WIDE, readoutFitScale('6,11', 'km'))).toBeGreaterThan(48);
-    expect(sizeAt(WIDE, readoutFitScale('6336'))).toBeGreaterThan(48);
-  });
-
-  it('shrinks the value+unit pair that overlapped in a narrow tile', () => {
-    // "6,11 km" and "5:44 min/km" at 48px are the two overlaps this rule exists for (spec 031).
-    const distance = sizeAt(NARROW, readoutFitScale('6,11', 'km'));
-    const pace = sizeAt(NARROW, readoutFitScale('5:44', 'min/km'));
-    expect(distance).toBeLessThan(48);
-    expect(pace).toBeLessThan(distance); // the longer unit costs more room
-    expect(pace).toBeGreaterThan(16); // ...but a readout never collapses to caption size
-  });
-
-  it('charges for the unit, so the same value fits smaller with one', () => {
-    expect(readoutFitScale('1 234', 'km')).toBeLessThan(readoutFitScale('1 234'));
-  });
-
-  it('is safe for an empty readout', () => {
-    expect(readoutFitScale('')).toBe(1);
-    expect(Number.isFinite(readoutFitScale(''))).toBe(true);
-  });
-});
-
-describe('labelFitScale', () => {
-  /** The label's line in a narrow hero tile, less the accent dot and its gap. */
-  const NARROW_LABEL = 118 - 16;
-  const sizeAt = (width: number, scale: number): number => width * scale;
-
-  it('keeps micro-caps at the token size when the longest word fits', () => {
-    // 12px is --text-xs; a wrapping multi-word label must not be punished for its total length.
-    expect(sizeAt(NARROW_LABEL, labelFitScale('CZAS W RUCHU'))).toBeGreaterThan(12);
-    expect(sizeAt(NARROW_LABEL, labelFitScale('KALORIE'))).toBeGreaterThan(12);
-  });
-
-  it('shrinks a long unbreakable word', () => {
-    // "PRZEWYŻSZENIE" has no wrap opportunity and used to run past the tile border (spec 031).
-    expect(sizeAt(NARROW_LABEL, labelFitScale('PRZEWYŻSZENIE'))).toBeLessThan(12);
-  });
-
-  it('sizes off the longest word, not the whole string', () => {
-    expect(labelFitScale('A B C D E F G H')).toBe(labelFitScale('A'));
-  });
-
-  it('is safe for an empty label', () => {
-    expect(labelFitScale('')).toBe(1);
+  it('lands two same-length values at the same step regardless of their exact characters', () => {
+    // The bug this guards against (spec 040): "30:26" and "4.94" used to render at different sizes
+    // in the same grid because a separate per-glyph scale (since removed) weighted their punctuation
+    // differently. The step itself — the only thing StatTile now sizes off — must not do that.
+    expect(readoutStep('30:26')).toBe(readoutStep('4.94'));
   });
 });
