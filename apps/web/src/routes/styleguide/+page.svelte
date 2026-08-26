@@ -10,6 +10,7 @@
     Badge,
     SegmentedControl,
     Toggle,
+    MultiSelect,
     Banner,
     Skeleton,
     StatTile,
@@ -35,6 +36,18 @@
   let errorValue = $state('not-an-email');
   let noteValue = $state('');
   let toggleOn = $state(true);
+
+  // Multi-select demo: overlay-chart picker (metric lane swatch per option), spec-style.
+  const overlayOptions = [
+    { value: 'hr', label: 'Tętno', color: 'var(--lane-red)' },
+    { value: 'battery', label: 'Body Battery', color: 'var(--lane-cyan)' },
+    { value: 'stress', label: 'Stres', color: 'var(--lane-amber)' },
+    { value: 'spo2', label: 'SpO2', color: 'var(--lane-sky)' },
+    { value: 'respiration', label: 'Oddech', color: 'var(--lane-teal)' }
+  ];
+  let overlaySelected = $state<string[]>(['hr']);
+  let overlayNone = $state<string[]>([]);
+  let overlayMany = $state<string[]>(['hr', 'battery', 'stress']);
 
   // Score-scale demos: one fully labelled scale (the check-in's soreness) and one anchors-only (RPE).
   const SORENESS_HINTS: Record<number, string> = {
@@ -179,6 +192,7 @@
     <a class="nav-link" href="#deltas">Delta badges</a>
     <a class="nav-link" href="#segmented">Segmented control</a>
     <a class="nav-link" href="#range">Range indicator</a>
+    <a class="nav-link" href="#multiselect">Multi-select</a>
     <a class="nav-link" href="#banners">Banners</a>
     <a class="nav-link" href="#stats">Stat tiles</a>
     <a class="nav-link" href="#sparklines">Sparklines</a>
@@ -372,6 +386,31 @@
         <Toggle checked={false} disabled label="Disabled" />
         <Toggle checked={true} loading label="Loading" />
       </div>
+    </section>
+
+    <!-- ============ MULTI-SELECT ============ -->
+    <section id="multiselect" class="group">
+      <h2>Multi-select</h2>
+      <p class="muted">
+        A trigger + popover checklist for picking zero-or-more items, e.g. which of a group's charts to
+        overlay. Options can carry a swatch colour matching a chart legend's series dot.
+      </p>
+
+      <h3>Empty / one / many selected</h3>
+      <div class="row">
+        <MultiSelect
+          options={overlayOptions}
+          bind:selected={overlayNone}
+          label="Nakładki wykresu"
+          placeholder="Wybierz metryki"
+        />
+        <MultiSelect options={overlayOptions} bind:selected={overlaySelected} label="Nakładki wykresu" />
+        <MultiSelect options={overlayOptions} bind:selected={overlayMany} label="Nakładki wykresu" />
+      </div>
+      <p class="muted">
+        Selected: {overlaySelected.length === 0 ? '(none)' : overlaySelected.join(', ')} ·
+        {overlayMany.length === 0 ? '(none)' : overlayMany.join(', ')}
+      </p>
     </section>
 
     <!-- ============ BANNERS ============ -->

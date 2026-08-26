@@ -47,7 +47,8 @@ export const ICON_NAMES = [
   'edit',
   'trash',
   'x',
-  'users'
+  'users',
+  'check'
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
@@ -280,6 +281,10 @@ export const ICONS: Readonly<Record<IconName, IconGlyph>> = {
       [17, 9.5, 2.2]
     ],
     paths: ['M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6', 'M15.5 14.2c2.5.4 4.5 2.5 4.5 5.3']
+  },
+  /* A single tick — "this is selected", used inside checkbox/option rows (e.g. MultiSelect). */
+  check: {
+    paths: ['M5 12.5l4.5 4.5L19 7']
   }
 };
 

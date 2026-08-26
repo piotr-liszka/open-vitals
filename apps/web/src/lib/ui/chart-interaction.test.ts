@@ -3,6 +3,7 @@ import {
   activeIndex,
   bandIndex,
   clampIndex,
+  clampZoomRange,
   edgeDefinedIndex,
   localX,
   nearestDefinedIndex,
@@ -59,6 +60,50 @@ describe('nearestPointIndex', () => {
     expect(nearestPointIndex(42, { n: 0, padX: 10, plotW: 100 })).toBe(-1);
     expect(nearestPointIndex(42, { n: 1, padX: 10, plotW: 100 })).toBe(0);
     expect(nearestPointIndex(42, { n: 4, padX: 0, plotW: 0 })).toBe(0);
+  });
+
+  describe('with a zoomed range', () => {
+    // Same 5-point lattice, but the plot now spans only indices 1..3 (a zoomed sub-window).
+    const zoomed = { n: 5, padX: 10, plotW: 100, range: [1, 3] as [number, number] };
+
+    it('maps the plot band to the range instead of the full lattice', () => {
+      expect(nearestPointIndex(10, zoomed)).toBe(1); // left edge → range start
+      expect(nearestPointIndex(60, zoomed)).toBe(2); // midpoint → range midpoint
+      expect(nearestPointIndex(110, zoomed)).toBe(3); // right edge → range end
+    });
+
+    it('reduces to the unzoomed formula when range is omitted', () => {
+      const axis = { n: 5, padX: 10, plotW: 100 };
+      expect(nearestPointIndex(37, axis)).toBe(nearestPointIndex(37, { ...axis, range: undefined }));
+    });
+
+    it('clamps outside the zoomed band to its own edges', () => {
+      expect(nearestPointIndex(-500, zoomed)).toBe(1);
+      expect(nearestPointIndex(9999, zoomed)).toBe(3);
+    });
+  });
+});
+
+describe('clampZoomRange', () => {
+  it('orders an out-of-order drag into an ascending range', () => {
+    expect(clampZoomRange(3, 1, 10)).toEqual([1, 3]);
+  });
+
+  it('clamps both ends inside [0, n-1]', () => {
+    expect(clampZoomRange(-5, 50, 10)).toEqual([0, 9]);
+  });
+
+  it('widens a zero-width (single-index) drag forward by one', () => {
+    expect(clampZoomRange(4, 4, 10)).toEqual([4, 5]);
+  });
+
+  it('widens backward instead, at the very last index', () => {
+    expect(clampZoomRange(9, 9, 10)).toEqual([8, 9]);
+  });
+
+  it('returns null when there is nothing to zoom into', () => {
+    expect(clampZoomRange(0, 0, 1)).toBeNull();
+    expect(clampZoomRange(0, 0, 0)).toBeNull();
   });
 });
 

@@ -262,47 +262,129 @@ describe('ActivityStreamsPanel', () => {
     });
   });
 
-  describe("one chart per metric, or all a group's metrics overlaid on one (view-mode switch)", () => {
-    it('draws one chart row per metric by default', () => {
+  describe('one chart per metric, or several picked metrics overlaid & normalised on one', () => {
+    function openPicker(container: HTMLElement): void {
+      container.querySelector<HTMLButtonElement>('.multiselect .trigger')!.click();
+    }
+
+    function pickOption(container: HTMLElement, label: string): void {
+      const option = [...container.querySelectorAll<HTMLButtonElement>('.multiselect .option')].find(
+        (b) => b.querySelector('.opt-label')?.textContent?.trim() === label
+      );
+      option!.click();
+    }
+
+    it('draws one chart row per metric by default — nothing picked yet', () => {
       const { container } = render(ActivityStreamsPanel, {
         props: { streams: runStreams, sport: 'run' }
       });
       expect(container.querySelectorAll('.chart-row')).toHaveLength(4);
     });
 
-    it('collapses each group to one overlaid chart in "All in one", with a legend to toggle metrics', async () => {
+    it('collapses to one overlaid chart once a metric is picked from "Select many"', async () => {
       const { container } = render(ActivityStreamsPanel, {
         props: { streams: runStreams, sport: 'run' }
       });
-      const combinedBtn = [...container.querySelectorAll('button')].find(
-        (b) => b.textContent?.trim() === 'Razem'
-      );
-      combinedBtn!.click();
+      openPicker(container);
+      await Promise.resolve();
+      pickOption(container, 'Tętno');
       await Promise.resolve();
 
-      // Wysiłek (2 metrics), Teren i warunki (1) and Fizjologia (1) — one overlaid chart each.
-      expect(container.querySelectorAll('.chart-row')).toHaveLength(3);
-      expect(container.querySelectorAll('svg')).toHaveLength(3);
-      expect(container.querySelectorAll('.legend')).not.toHaveLength(0);
+      expect(container.querySelectorAll('.chart-row')).toHaveLength(1);
+      expect(container.querySelectorAll('svg.chart-svg')).toHaveLength(1);
     });
 
-    it('switches back to one-chart-per-metric from "One by one"', async () => {
+    it('overlays every picked metric on that one chart, with a legend naming each one', async () => {
       const { container } = render(ActivityStreamsPanel, {
         props: { streams: runStreams, sport: 'run' }
       });
-      const combinedBtn = [...container.querySelectorAll('button')].find(
-        (b) => b.textContent?.trim() === 'Razem'
-      );
-      combinedBtn!.click();
+      openPicker(container);
       await Promise.resolve();
-      expect(container.querySelectorAll('.chart-row')).toHaveLength(3);
+      pickOption(container, 'Tętno');
+      pickOption(container, 'Wysokość');
+      await Promise.resolve();
 
-      const stackedBtn = [...container.querySelectorAll('button')].find(
-        (b) => b.textContent?.trim() === 'Pojedynczo'
+      const legendNames = [...container.querySelectorAll('.legend .name')].map((el) =>
+        el.textContent?.trim()
       );
-      stackedBtn!.click();
+      expect(legendNames).toEqual(['Tętno', 'Wysokość']);
+    });
+
+    it('normalises picked metrics onto one shared 0–100 scale, whatever their own units are', async () => {
+      // Heart rate (~140-150 bpm) and elevation (~100-159 m) — wildly different raw ranges.
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      // Heart rate's OWN y-axis, in the default one-chart-per-metric view — real bpm ticks.
+      const rawHrTicks = [...container.querySelectorAll('text.axis-tick.y')].map((t) => t.textContent);
+
+      openPicker(container);
+      await Promise.resolve();
+      pickOption(container, 'Tętno');
+      pickOption(container, 'Wysokość');
+      await Promise.resolve();
+
+      expect(container.querySelector('.chart-row')?.textContent).toContain('%');
+      const normalisedTicks = [...container.querySelectorAll('text.axis-tick.y')].map((t) => t.textContent);
+      expect(normalisedTicks).not.toEqual(rawHrTicks);
+    });
+
+    it('returns to one-chart-per-metric once every pick is cleared', async () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      openPicker(container);
+      await Promise.resolve();
+      pickOption(container, 'Tętno');
+      await Promise.resolve();
+      expect(container.querySelectorAll('.chart-row')).toHaveLength(1);
+
+      // The popover stays open across picks — no need to reopen it — so this un-picks the same option.
+      pickOption(container, 'Tętno');
       await Promise.resolve();
       expect(container.querySelectorAll('.chart-row')).toHaveLength(4);
+    });
+  });
+
+  describe('shared zoom across the stack', () => {
+    const resetLabel = 'Zresetuj powiększenie';
+    const hasResetButton = (container: HTMLElement): boolean =>
+      [...container.querySelectorAll('button')].some((b) => b.textContent?.trim() === resetLabel);
+
+    it('shows a reset control only once a chart has been zoomed', async () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      pinWidths(container);
+      expect(hasResetButton(container)).toBe(false);
+
+      const hit = container.querySelectorAll('rect.hit')[0]!;
+      pointer(hit, 'pointerdown', 0);
+      pointer(hit, 'pointermove', 400);
+      pointer(hit, 'pointerup', 400);
+      await Promise.resolve();
+
+      expect(hasResetButton(container)).toBe(true);
+    });
+
+    it('resets every chart in the stack from the one shared control', async () => {
+      const { container } = render(ActivityStreamsPanel, {
+        props: { streams: runStreams, sport: 'run' }
+      });
+      pinWidths(container);
+      const hit = container.querySelectorAll('rect.hit')[0]!;
+      pointer(hit, 'pointerdown', 0);
+      pointer(hit, 'pointermove', 400);
+      pointer(hit, 'pointerup', 400);
+      await Promise.resolve();
+
+      const resetBtn = [...container.querySelectorAll('button')].find(
+        (b) => b.textContent?.trim() === resetLabel
+      );
+      resetBtn!.click();
+      await Promise.resolve();
+
+      expect(hasResetButton(container)).toBe(false);
     });
   });
 

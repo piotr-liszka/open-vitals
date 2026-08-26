@@ -21,6 +21,8 @@
   } from './chart-axis';
   import {
     activeIndex,
+    clampIndex,
+    clampZoomRange,
     edgeDefinedIndex,
     localX,
     nearestDefinedIndex,
@@ -104,6 +106,16 @@
     gutterLeft?: number;
     /** Reports the inset THIS chart's own y ticks need, so a caller can compute that maximum. */
     onGutter?: (px: number) => void;
+    /**
+     * Currently visible index range into the shared lattice, inclusive `[start, end]` — bindable, like
+     * `selectedIndex`/`hoverIndex`, so a caller drawing several charts on one shared lattice can zoom
+     * them together by binding the same variable into every chart. `null` (default) shows the full
+     * range. Set by dragging across the plot; a double-click resets it to `null`.
+     */
+    zoomDomain?: [number, number] | null;
+    /** Fired whenever a drag or the double-click reset changes `zoomDomain` — mirrors `onSelect`
+     *  alongside `selectedIndex`, for a caller that would rather listen than read the binding back. */
+    onZoomChange?: (domain: [number, number] | null) => void;
   }
 
   let {
@@ -128,7 +140,9 @@
     emphasisIndex = null,
     emphasisLabel = 'highlighted',
     gutterLeft = 0,
-    onGutter
+    onGutter,
+    zoomDomain = $bindable(null),
+    onZoomChange
   }: Props = $props();
 
   // Measured width → 1:1 pixel coordinate system so point labels, ticks and markers
@@ -185,8 +199,41 @@
 
   const n = $derived(seriesLength(resolved));
   const defined = $derived(definedMask(visible, n));
-  const definedCount = $derived(defined.reduce((c, d) => (d ? c + 1 : c), 0));
-  const hasData = $derived(definedCount > 0);
+
+  /*
+    Drag-to-zoom (spec: TrendChart). `zoomDomain` is the caller-owned, bindable window into the SAME
+    index space everything else already uses — only the pixel mapping (`xOf`) and what gets drawn
+    change. Re-clamped here rather than trusted as-is, since a caller may bind the same variable into
+    several charts sharing one lattice, or hand back a stale range after the series shrinks; a
+    degenerate (zero-width, or fully out-of-range) value quietly behaves as unzoomed rather than
+    throwing.
+  */
+  const zoomRange = $derived.by<[number, number] | undefined>(() => {
+    if (!zoomDomain || n <= 1) return undefined;
+    const lo = clampIndex(Math.min(zoomDomain[0], zoomDomain[1]), n);
+    const hi = clampIndex(Math.max(zoomDomain[0], zoomDomain[1]), n);
+    return hi > lo ? [lo, hi] : undefined;
+  });
+  const zoomed = $derived(zoomRange !== undefined);
+
+  /** `true` for every index inside the current zoom window — everywhere, when not zoomed. */
+  function inZoom(i: number): boolean {
+    return !zoomRange || (i >= zoomRange[0] && i <= zoomRange[1]);
+  }
+
+  // Whether the chart has ANY data at all — independent of the zoom window, so dragging into a
+  // stretch that happens to be all gaps never tears down the hit rect / dblclick-to-reset affordance.
+  const hasData = $derived(defined.some(Boolean));
+
+  // "N points" as far as the read-out/aria/legend are concerned: the whole series normally, only the
+  // zoomed window once one is set — the counts a zoomed chart's summary should report.
+  const definedCount = $derived.by(() => {
+    if (!zoomRange) return defined.reduce((c, d) => (d ? c + 1 : c), 0);
+    const [lo, hi] = zoomRange;
+    let c = 0;
+    for (let i = lo; i <= hi; i++) if (defined[i]) c++;
+    return c;
+  });
 
   const stats = $derived.by(() => {
     let min = Infinity;
@@ -194,8 +241,9 @@
     let sum = 0;
     let count = 0;
     for (const s of visible) {
-      for (const v of s.values) {
-        if (!Number.isFinite(v)) continue;
+      for (let i = 0; i < s.values.length; i++) {
+        const v = s.values[i];
+        if (v === undefined || !Number.isFinite(v) || !inZoom(i)) continue;
         if (v < min) min = v;
         if (v > max) max = v;
         sum += v;
@@ -252,6 +300,10 @@
   const plotH = $derived(Math.max(0, plotBottom - plotTop));
 
   function xOf(i: number): number {
+    if (zoomRange) {
+      const [lo, hi] = zoomRange;
+      return plotL + ((i - lo) / (hi - lo)) * plotW;
+    }
     return n <= 1 ? plotL + plotW / 2 : plotL + (i / (n - 1)) * plotW;
   }
 
@@ -263,11 +315,19 @@
   // micro/decorative uses.
   const plainGrid = $derived([0, 1, 2, 3].map((k) => plotTop + (k / 3) * plotH));
 
-  const xLabelW = $derived(maxTextWidth(labels ?? [], axisFont));
+  // Blanked outside the zoom window (rather than sliced) so index `i` — what `xOf` and every other
+  // consumer expect — never has to be remapped back and forth between "position in the window" and
+  // "position in the lattice".
+  const visibleLabels = $derived.by(() => {
+    if (!labels || !zoomRange) return labels;
+    const [lo, hi] = zoomRange;
+    return labels.map((t, i) => (i >= lo && i <= hi ? t : ''));
+  });
+  const xLabelW = $derived(maxTextWidth(visibleLabels ?? [], axisFont));
   const xTicks = $derived.by(() => {
-    if (!showX || !labels || n === 0) return [];
-    return axisLabelIndices(labels, n, xOf, xLabelW + TICK_GAP, W).flatMap((i) => {
-      const text = labels[i];
+    if (!showX || !visibleLabels || n === 0) return [];
+    return axisLabelIndices(visibleLabels, n, xOf, xLabelW + TICK_GAP, W).flatMap((i) => {
+      const text = labels?.[i];
       if (text === undefined || text === '') return [];
       const x = xOf(i);
       return [{ i, x, text, anchor: textAnchorAt(x, W, xLabelW) }];
@@ -283,16 +343,20 @@
     i: number;
   }
 
+  // Values outside the zoom window are treated exactly like a gap: not drawn, and the pen lifts
+  // rather than drawing a line across the crop.
   function finitePoints(s: { values: number[] }): Pt[] {
-    return s.values.flatMap((v, i) => (Number.isFinite(v) ? [{ x: xOf(i), y: yOf(v), v, i }] : []));
+    return s.values.flatMap((v, i) =>
+      Number.isFinite(v) && inZoom(i) ? [{ x: xOf(i), y: yOf(v), v, i }] : []
+    );
   }
 
-  /** Line path that lifts the pen over gaps, so a missing day is a break and not a straight lie. */
+  /** Line path that lifts the pen over gaps (and out-of-zoom stretches), so neither reads as a straight lie. */
   function linePathOf(s: { values: number[] }): string {
     let d = '';
     let pen = false;
     s.values.forEach((v, i) => {
-      if (!Number.isFinite(v)) {
+      if (!Number.isFinite(v) || !inZoom(i)) {
         pen = false;
         return;
       }
@@ -302,7 +366,7 @@
     return d.trim();
   }
 
-  /** Area fill, one closed run per unbroken stretch of the line. */
+  /** Area fill, one closed run per unbroken (and in-zoom) stretch of the line. */
   function areaPathOf(s: { values: number[] }): string {
     let d = '';
     let run: Pt[] = [];
@@ -317,7 +381,7 @@
       run = [];
     };
     s.values.forEach((v, i) => {
-      if (!Number.isFinite(v)) {
+      if (!Number.isFinite(v) || !inZoom(i)) {
         flush();
         return;
       }
@@ -351,9 +415,10 @@
   const solo = $derived(visible.length === 1 ? visible[0] : undefined);
 
   // Min & max markers — single-series only, and suppressed for flat/short series where they'd
-  // coincide or fight the read-out for attention.
+  // coincide or fight the read-out for attention. Reads `finitePoints`, so zooming rescales which
+  // points are even candidates, exactly like a chart drawn on just the visible window would.
   const markers = $derived.by(() => {
-    if (!solo || flat || definedCount <= 1) return undefined;
+    if (!solo || flat) return undefined;
     const pts = finitePoints(solo);
     if (pts.length < 2) return undefined;
     let hi = pts[0]!;
@@ -365,10 +430,11 @@
     return { hi, lo };
   });
 
-  // A single reading renders as a lone dot.
+  // A single (visible) reading renders as a lone dot.
   const single = $derived.by(() => {
-    if (!solo || definedCount !== 1) return undefined;
-    return finitePoints(solo)[0];
+    if (!solo) return undefined;
+    const pts = finitePoints(solo);
+    return pts.length === 1 ? pts[0] : undefined;
   });
 
   /*
@@ -377,11 +443,13 @@
     making a statement about the DATA, not about what the pointer is doing.
 
     An index outside the lattice, or one whose series has a gap there, yields nothing — an emphasis
-    ring floating over a missing sample would be a claim about a value that does not exist.
+    ring floating over a missing sample would be a claim about a value that does not exist. Same
+    treatment for an index that exists but has been zoomed out of view.
   */
   const emphasis = $derived.by(() => {
     if (emphasisIndex === null || !Number.isInteger(emphasisIndex)) return undefined;
     if (emphasisIndex < 0 || emphasisIndex >= n) return undefined;
+    if (!inZoom(emphasisIndex)) return undefined;
     const points = visible.flatMap((s) => {
       const v = s.values[emphasisIndex];
       return v !== undefined && Number.isFinite(v)
@@ -422,6 +490,15 @@
   const activeX = $derived(activeI === null ? 0 : xOf(activeI));
   const activeLabel = $derived(activeI === null ? undefined : labels?.[activeI]);
   const pinned = $derived(hoverIndex === null && activeI !== null);
+  /**
+   * A pinned moment survives a zoom that scrolls it out of view — several charts can share one
+   * `selectedIndex` while zooming independently, so the pin has to be allowed to point somewhere
+   * this particular chart isn't currently showing. `activeX` would place it outside the plot rect in
+   * that case, so the on-chart cursor/tooltip are suppressed here the same way `emphasis` already is
+   * for an out-of-zoom index — the value itself is still correct and still reaches a caller's own
+   * read-out (e.g. `FloatingReadout`), which is not drawn against this chart's x scale.
+   */
+  const activeVisible = $derived(activeI !== null && inZoom(activeI));
 
   interface ActiveValue {
     name: string;
@@ -454,9 +531,86 @@
     const el = wrapperEl;
     if (!el || !hasData) return;
     const x = localX(e.clientX, el.getBoundingClientRect(), W);
-    const i = nearestPointIndex(x, { n, padX: plotL, plotW });
+    const i = nearestPointIndex(x, { n, padX: plotL, plotW, range: zoomRange });
     const j = nearestDefinedIndex(i, defined);
     hoverIndex = j < 0 ? null : j;
+  }
+
+  // ---- drag-to-zoom ----
+
+  /** A pointer's raw (un-defined-snapped) lattice index, for drag bookkeeping — zoom operates on the
+   *  index lattice itself, not on where the data happens to have gaps. */
+  function dragIndexAt(x: number): number {
+    return nearestPointIndex(x, { n, padX: plotL, plotW, range: zoomRange });
+  }
+
+  interface DragPoint {
+    index: number;
+    x: number;
+  }
+
+  let dragStart: DragPoint | null = $state(null);
+  let dragCurrent: DragPoint | null = $state(null);
+
+  /** A drag reads as an intentional zoom only once it clears a small pixel threshold — otherwise an
+   *  ordinary click (the current, unchanged pin-on-click gesture) would be misread as a zero-width zoom. */
+  const DRAG_THRESHOLD_PX = 6;
+  const dragSpan = $derived.by(() => {
+    const a = dragStart;
+    const b = dragCurrent;
+    return a && b ? Math.abs(b.x - a.x) : 0;
+  });
+  const dragging = $derived(dragStart !== null && dragCurrent !== null && dragSpan >= DRAG_THRESHOLD_PX);
+  const dragBandX = $derived.by(() => {
+    const a = dragStart;
+    const b = dragCurrent;
+    return a && b ? Math.min(a.x, b.x) : 0;
+  });
+  const dragBandW = $derived(dragSpan);
+
+  function onPointerDown(e: PointerEvent): void {
+    pick(e);
+    const el = wrapperEl;
+    if (!el || !hasData) return;
+    const x = localX(e.clientX, el.getBoundingClientRect(), W);
+    const point = { index: dragIndexAt(x), x };
+    dragStart = point;
+    dragCurrent = point;
+  }
+
+  function onPointerMove(e: PointerEvent): void {
+    pick(e);
+    if (!dragStart) return;
+    const el = wrapperEl;
+    if (!el) return;
+    const x = localX(e.clientX, el.getBoundingClientRect(), W);
+    dragCurrent = { index: dragIndexAt(x), x };
+  }
+
+  function onPointerUp(): void {
+    if (dragging && dragStart && dragCurrent) {
+      zoomDomain = clampZoomRange(dragStart.index, dragCurrent.index, n);
+      onZoomChange?.(zoomDomain);
+      dragStart = null;
+      dragCurrent = null;
+      return;
+    }
+    dragStart = null;
+    dragCurrent = null;
+    commit();
+  }
+
+  function onPointerLeave(): void {
+    hoverIndex = null;
+    dragStart = null;
+    dragCurrent = null;
+  }
+
+  /** Convenience per-chart reset: a caller may also write `null` into the bound `zoomDomain` itself. */
+  function onDoubleClick(): void {
+    if (zoomDomain === null) return;
+    zoomDomain = null;
+    onZoomChange?.(null);
   }
 
   /** Pin the read-out where it currently sits, so a caller's headline can follow it. */
@@ -697,7 +851,7 @@
           {/each}
         {/if}
 
-        {#if activeI !== null}
+        {#if activeVisible}
           <line
             class="cursor"
             class:pinned
@@ -712,8 +866,21 @@
           {/each}
         {/if}
 
+        {#if dragging}
+          <!-- Selection band for a drag-to-zoom in progress: the range about to be committed. -->
+          <rect
+            class="drag-band"
+            x={dragBandX}
+            y={plotTop}
+            width={dragBandW}
+            height={plotH}
+            pointer-events="none"
+          />
+        {/if}
+
         <!-- Transparent hit layer: hover or drag anywhere over the chart to read a value, click or
-             tap to pin it. `touch-action: pan-y` keeps a vertical swipe scrolling the page. -->
+             tap to pin it; drag past a small threshold to zoom, double-click to reset it.
+             `touch-action: pan-y` keeps a vertical swipe scrolling the page. -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <rect
           class="hit"
@@ -722,16 +889,17 @@
           y="0"
           width={W}
           {height}
-          onpointerdown={pick}
-          onpointermove={pick}
-          onpointerup={commit}
-          onpointerleave={() => (hoverIndex = null)}
-          onpointercancel={() => (hoverIndex = null)}
+          onpointerdown={onPointerDown}
+          onpointermove={onPointerMove}
+          onpointerup={onPointerUp}
+          onpointerleave={onPointerLeave}
+          onpointercancel={onPointerLeave}
+          ondblclick={onDoubleClick}
         />
       {/if}
     </svg>
 
-    {#if tooltip && activeI !== null && tooltipRows.length > 0}
+    {#if tooltip && activeVisible && tooltipRows.length > 0}
       <ChartTooltip x={activeX} width={W} title={activeLabel} rows={tooltipRows} />
     {/if}
     {#if hasData}<span class="sr-only" aria-live="polite">{readout}</span>{/if}
@@ -909,6 +1077,14 @@
     fill: var(--series, var(--chart-color));
     stroke: var(--color-surface);
     stroke-width: 2;
+  }
+
+  /* Drag-to-zoom selection band: an unobtrusive preview of the range about to be committed, styled
+     off the same accent tokens the pinned cursor already uses rather than a bespoke color. */
+  .drag-band {
+    fill: var(--color-accent-soft);
+    stroke: var(--color-accent-line);
+    stroke-width: 1;
   }
 
   .hit {

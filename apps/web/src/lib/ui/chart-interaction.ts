@@ -17,6 +17,12 @@ export interface PointAxis {
   padX: number;
   /** Width spanned from the first to the last point. */
   plotW: number;
+  /**
+   * When set, `plotW` is understood to span this inclusive index sub-range instead of the full
+   * `[0, n-1]` lattice — the reverse of a zoomed `xOf` (spec: TrendChart drag-to-zoom). Omit for the
+   * ordinary, unzoomed full-range mapping.
+   */
+  range?: readonly [number, number] | undefined;
 }
 
 /** Equal-width bands — bar charts, where every value owns a slot rather than sitting on a lattice. */
@@ -43,12 +49,41 @@ export function localX(clientX: number, rect: { left: number; width: number }, v
   return ((clientX - rect.left) / rect.width) * viewWidth;
 }
 
-/** Index of the lattice point nearest `x`. `-1` for an empty series. */
+/**
+ * Index of the lattice point nearest `x`. `-1` for an empty series.
+ *
+ * With `axis.range` set, `plotW` is treated as spanning that sub-range rather than the full lattice
+ * — the mirror of a zoomed `xOf`, so hit-testing resolves an index inside the visible window instead
+ * of the whole series (spec: TrendChart drag-to-zoom). The formula reduces to the original unzoomed
+ * one when `range` is omitted, so every existing caller is unaffected.
+ *
+ * The result is clamped to `[lo, hi]`, not to `[0, n-1]`: the hit rect spans the whole chart (axis
+ * gutters included), so an `x` past the zoomed plot's own edge is a real, reachable pointer position
+ * — over the y-axis label margin, say — and has to resolve to the nearest point STILL ON SCREEN, not
+ * to an index the zoom has scrolled out of view.
+ */
 export function nearestPointIndex(x: number, axis: PointAxis): number {
   const { n, padX, plotW } = axis;
   if (n <= 0) return -1;
-  if (n === 1 || !(plotW > 0) || !Number.isFinite(x)) return 0;
-  return clampIndex(Math.round(((x - padX) / plotW) * (n - 1)), n);
+  const [lo, hi] = axis.range ?? [0, n - 1];
+  if (!(hi > lo) || !(plotW > 0) || !Number.isFinite(x)) return clampIndex(lo, n);
+  const raw = Math.round(lo + ((x - padX) / plotW) * (hi - lo));
+  return Math.min(hi, Math.max(lo, raw));
+}
+
+/**
+ * Turns a raw index pair from a completed drag-to-zoom gesture into a valid zoom domain: ordered,
+ * clamped inside `[0, n-1]`, and widened to at least one index wide (a zero-width zoom would collapse
+ * the x scale to a point). `null` when there is nothing to zoom into (`n <= 1`).
+ */
+export function clampZoomRange(a: number, b: number, n: number): [number, number] | null {
+  if (n <= 1) return null;
+  const lo0 = clampIndex(Math.min(a, b), n);
+  const hi0 = clampIndex(Math.max(a, b), n);
+  if (hi0 - lo0 >= 1) return [lo0, hi0];
+  // Degenerate (same index, or clamped to the same one): widen forward, or — at the last index —
+  // widen backward instead, so the result always spans at least one index.
+  return lo0 < n - 1 ? [lo0, lo0 + 1] : [lo0 - 1, lo0];
 }
 
 /** Index of the band containing `x`. `-1` for an empty series. */

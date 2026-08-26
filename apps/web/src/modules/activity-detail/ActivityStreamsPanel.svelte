@@ -28,6 +28,8 @@
    */
   import TrendChart from '$lib/ui/TrendChart.svelte';
   import SegmentedControl from '$lib/ui/SegmentedControl.svelte';
+  import MultiSelect, { type MultiSelectOption } from '$lib/ui/MultiSelect.svelte';
+  import Button from '$lib/ui/Button.svelte';
   import FloatingReadout, { type FloatingReadoutItem } from '$lib/ui/FloatingReadout.svelte';
   import TimelineStrip, { type TimelineMarker, type TimelineSegment } from '$lib/ui/TimelineStrip.svelte';
   import { AXIS_GAP } from '$lib/ui/chart-axis';
@@ -65,10 +67,14 @@
   let pinned = $state<number | null>(null);
   /** Shared live-hover sample index — the dashed rule that tracks the pointer across the stack. */
   let hovered = $state<number | null>(null);
-  /** 'stacked' draws one chart per metric (the original layout); 'combined' overlays a group's
-   *  metrics on one chart so their shapes can be read against each other, with the legend toggling
-   *  each one off. */
-  let chartMode = $state<'stacked' | 'combined'>('stacked');
+  /**
+   * Charts picked to overlay on one normalised chart instead of the default one-chart-per-metric
+   * stack. Empty (the default) means "one by one" — nothing else has to say so.
+   */
+  let selectedChartKeys = $state<string[]>([]);
+  /** Shared zoom window, bound into every chart on the panel (stacked or overlaid) so dragging any
+   *  one of them zooms the whole stack together, the same way the crosshair is shared. */
+  let zoomDomain = $state<[number, number] | null>(null);
   /** The panel's own root, so a pointerdown elsewhere on the page can be told apart from one on a
    *  chart or the strip — see the document-level listener below. */
   let panelEl: HTMLDivElement | undefined = $state();
@@ -184,41 +190,54 @@
     // The lattice changes under us, so a pinned or hovered index would point at a different moment.
     pinned = null;
     hovered = null;
+    zoomDomain = null;
     // Re-lattising can drop charts; a stale entry here would keep inflating the shared gutter.
     gutters = {};
     axis = value === 'distance' ? 'distance' : 'time';
   }
 
-  const chartModeOptions = $derived([
-    { value: 'stacked', label: i18n.t('streams.viewMode.stacked') },
-    { value: 'combined', label: i18n.t('streams.viewMode.combined') }
-  ]);
+  /** Every chart on the panel, as options for the "select many" overlay picker — flat, not grouped,
+   *  so a mix from different sections (e.g. heart rate AND elevation) can be overlaid together. */
+  const overlayOptions = $derived<MultiSelectOption[]>(
+    set.charts.map((c) => ({ value: c.key, label: c.title, color: c.color }))
+  );
+  const combinedMode = $derived(selectedChartKeys.length > 0);
+  const selectedCharts = $derived(set.charts.filter((c) => selectedChartKeys.includes(c.key)));
 
-  function onChartModeChange(value: string): void {
-    chartMode = value === 'combined' ? 'combined' : 'stacked';
-  }
-
-  /** A group's metrics overlaid as named series on one chart — each chart's own `series` (if it
-   *  already carries more than one line) is flattened in rather than nested, so the legend lists
-   *  every line at the same level. */
-  function combinedSeries(charts: readonly ActivityChartSpec[]): ChartSeriesSpec[] {
-    return charts.flatMap((c) =>
-      c.series
-        ? c.series.map((s) => ({ name: s.name || c.title, values: s.values, color: s.color }))
-        : [{ name: c.title, values: c.values, color: c.color }]
+  /**
+   * Min-max scaled to 0–100 so metrics of unlike units (bpm, min/km, W, …) can share one y-axis and
+   * be compared by SHAPE, not by scale. A flat run (min === max) maps to a flat 50 rather than a
+   * divide-by-zero; a gap stays a gap, so the overlaid line breaks exactly where the source would.
+   */
+  function normalize(values: readonly number[]): number[] {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const v of values) {
+      if (!Number.isFinite(v)) continue;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return values.map(() => Number.NaN);
+    const span = max - min;
+    return values.map((v) =>
+      Number.isFinite(v) ? (span === 0 ? 50 : ((v - min) / span) * 100) : Number.NaN
     );
   }
 
-  /**
-   * Once metrics of different kinds share a chart there is no single correct read-out format —
-   * bpm and min/km cannot both be right. The combined chart's own legend/point labels use the
-   * first metric's formatter as the closest approximation; the floating read-out bar below still
-   * formats every metric correctly regardless of which mode is showing, so nothing here is the
-   * only source of truth for a value.
-   */
-  function combinedFormatter(charts: readonly ActivityChartSpec[]): (n: number) => string {
-    return formatter(charts[0]?.kind ?? 'decimal');
-  }
+  /** The picked charts overlaid as named, normalised series on one chart — each chart's own `series`
+   *  (if it already carries more than one line) is flattened in rather than nested, so the legend
+   *  lists every line at the same level. */
+  const overlaySeries = $derived<ChartSeriesSpec[]>(
+    selectedCharts.flatMap((c) =>
+      c.series
+        ? c.series.map((s) => ({
+            name: s.name ? `${c.title} — ${s.name}` : c.title,
+            values: normalize(s.values),
+            color: s.color
+          }))
+        : [{ name: c.title, values: normalize(c.values), color: c.color }]
+    )
+  );
 
   function formatter(kind: ChartValueKind): (n: number) => string {
     if (kind === 'pace') return (n) => fmtPace(n);
@@ -319,12 +338,17 @@
       {/if}
     </div>
     <div class="head-controls">
-      <SegmentedControl
-        options={chartModeOptions}
-        value={chartMode}
-        onChange={onChartModeChange}
-        ariaLabel={i18n.t('streams.viewModeAriaLabel')}
-        size="sm"
+      {#if zoomDomain !== null}
+        <Button variant="ghost" size="sm" onclick={() => (zoomDomain = null)}>
+          {i18n.t('streams.zoom.reset')}
+        </Button>
+      {/if}
+      <MultiSelect
+        options={overlayOptions}
+        bind:selected={selectedChartKeys}
+        label={i18n.t('streams.selectCharts.label')}
+        placeholder={i18n.t('streams.selectCharts.placeholder')}
+        summaryFormatter={(count) => i18n.t('streams.selectCharts.summary', { count })}
       />
       {#if set.canUseDistance}
         <SegmentedControl
@@ -371,27 +395,35 @@
     </section>
   {/if}
 
-  {#each groups as group (group.key)}
+  {#if combinedMode}
     <section class="group">
-      <h4 class="group-title">{group.title}</h4>
-      {#if chartMode === 'combined'}
-        <div class="chart-row">
-          <TrendChart
-            series={combinedSeries(group.charts)}
-            labels={[...set.labels]}
-            label={group.title}
-            height={220}
-            showArea={false}
-            legend={true}
-            formatValue={combinedFormatter(group.charts)}
-            bind:selectedIndex={pinned}
-            bind:hoverIndex={hovered}
-            tooltip={false}
-            {gutterLeft}
-            onGutter={(px) => (gutters[`${group.key}::combined`] = px)}
-          />
-        </div>
-      {:else}
+      <div class="combined-head">
+        <h4 class="group-title">{i18n.t('streams.combined.title')}</h4>
+        <p class="plan-note">{i18n.t('streams.combined.note')}</p>
+      </div>
+      <div class="chart-row">
+        <TrendChart
+          series={overlaySeries}
+          labels={[...set.labels]}
+          unit="%"
+          label={i18n.t('streams.combined.title')}
+          height={240}
+          showArea={false}
+          legend={true}
+          formatValue={(n) => fmtNum(Math.round(n), 0, i18n.locale)}
+          bind:selectedIndex={pinned}
+          bind:hoverIndex={hovered}
+          bind:zoomDomain
+          tooltip={false}
+          {gutterLeft}
+          onGutter={(px) => (gutters['combined'] = px)}
+        />
+      </div>
+    </section>
+  {:else}
+    {#each groups as group (group.key)}
+      <section class="group">
+        <h4 class="group-title">{group.title}</h4>
         {#each group.charts as chart (chart.key)}
           <div class="chart-row">
             <div class="chart-head">
@@ -412,15 +444,16 @@
               formatValue={formatter(chart.kind)}
               bind:selectedIndex={pinned}
               bind:hoverIndex={hovered}
+              bind:zoomDomain
               tooltip={false}
               {gutterLeft}
               onGutter={(px) => (gutters[chart.key] = px)}
             />
           </div>
         {/each}
-      {/if}
-    </section>
-  {/each}
+      </section>
+    {/each}
+  {/if}
 </div>
 
 <FloatingReadout open={active !== null} lead={activeLead} secondary={activeSecondary} items={activeItems} />
@@ -496,6 +529,19 @@
     margin: 0;
     font-size: var(--text-xs);
     color: var(--color-text-muted);
+  }
+
+  .combined-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .combined-head .group-title {
+    padding-bottom: 0;
+    border-bottom: none;
   }
 
   /* One "Planned" and one "Executed" subsection under the "Workout structure" heading, each its

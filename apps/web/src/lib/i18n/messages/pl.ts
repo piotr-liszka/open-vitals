@@ -1024,9 +1024,13 @@ export const pl = {
   'streams.axisAriaLabel': 'Oś pozioma wykresów',
   'streams.hint':
     'Najedź na dowolny wykres — ten sam moment zaznaczy się na wszystkich. Kliknięcie przypina go na stałe.',
-  'streams.viewMode.stacked': 'Pojedynczo',
-  'streams.viewMode.combined': 'Razem',
-  'streams.viewModeAriaLabel': 'Układ wykresów',
+  'streams.selectCharts.label': 'Wykresy do nałożenia',
+  'streams.selectCharts.placeholder': 'Wybierz wiele',
+  'streams.selectCharts.summary': '{count} wybranych',
+  'streams.combined.title': 'Widok połączony',
+  'streams.combined.note':
+    'Znormalizowane do 0–100%, żeby porównać kształt różnych jednostek — dokładne wartości nadal są na pasku poniżej.',
+  'streams.zoom.reset': 'Zresetuj powiększenie',
 
   /* ---- activity-charts.ts: chart specs passed as props into TrendChart ---- */
   'chart.section.effort': 'Wysiłek',

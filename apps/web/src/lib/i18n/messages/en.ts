@@ -995,9 +995,13 @@ export const en: Catalog = {
   'streams.axis.distance': 'Distance',
   'streams.axisAriaLabel': "Charts' horizontal axis",
   'streams.hint': 'Hover any chart — the same moment is marked on all of them. Click to pin it in place.',
-  'streams.viewMode.stacked': 'One by one',
-  'streams.viewMode.combined': 'All in one',
-  'streams.viewModeAriaLabel': 'Chart layout',
+  'streams.selectCharts.label': 'Charts to overlay',
+  'streams.selectCharts.placeholder': 'Select many',
+  'streams.selectCharts.summary': '{count} selected',
+  'streams.combined.title': 'Combined view',
+  'streams.combined.note':
+    'Normalised to 0–100% so different units can be compared by shape — exact values are still in the bar below.',
+  'streams.zoom.reset': 'Reset zoom',
 
   /* ---- activity-charts.ts: chart specs passed as props into TrendChart ---- */
   'chart.section.effort': 'Effort',

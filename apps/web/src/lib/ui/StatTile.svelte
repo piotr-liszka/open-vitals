@@ -128,11 +128,13 @@
   }
 
   /* The accent lives on the card, not on a marker dot next to the label (spec 040): a coloured
-     border plus a soft accent-tinted glow around it. */
+     border plus a soft accent-tinted glow. A uniform ring read as a *selection* state (the outline a
+     focused/checked control gets), so this is a drop shadow instead — cast down and out like the
+     card is lit from above, which only ever reads as "this card has a colour", never as "selected". */
   .tile.has-accent {
     box-shadow:
       var(--shadow-sm),
-      0 0 0 3px color-mix(in srgb, var(--tile-accent) 14%, transparent);
+      0 var(--space-2) var(--space-3) -6px color-mix(in srgb, var(--tile-accent) 55%, transparent);
   }
 
   .top {
@@ -182,8 +184,11 @@
 
   .readout {
     display: flex;
-    align-items: baseline;
-    gap: var(--space-2);
+    /* The unit reads as a caption under the number, not a suffix beside it — every tile's number
+       lands at the same baseline this way, whatever its unit's own width happens to be. */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
     min-width: 0;
     /* The tile border is a hard boundary: an absurd value clips here rather than escaping (spec 029). */
     overflow: hidden;
@@ -234,6 +239,9 @@
     letter-spacing: var(--tracking-tight);
     color: var(--color-text-muted);
     white-space: nowrap;
+    /* A hair of daylight from the number's own descenders, not a full gap — it still reads as one
+       readout, value and unit, rather than two stacked lines of unrelated text. */
+    margin-top: -0.1em;
   }
 
   /*

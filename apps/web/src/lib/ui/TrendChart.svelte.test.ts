@@ -563,4 +563,168 @@ describe('TrendChart', () => {
     expect(line?.getAttribute('d')).not.toContain('NaN');
     expect(container.querySelector('path.area')?.getAttribute('d')).not.toContain('NaN');
   });
+
+  describe('drag-to-zoom', () => {
+    // Same fixture as the hover/tap/keyboard block: 4 points at 25.6, 221.9, 418.1, 614.4.
+    const props = {
+      values: [10, 20, 30, 40],
+      labels: ['1 Aug', '2 Aug', '3 Aug', '4 Aug'],
+      label: 'steps'
+    };
+
+    it('leaves a plain click pinning exactly as before — no zoom for a sub-threshold drag', async () => {
+      const onSelect = vi.fn();
+      const onZoomChange = vi.fn();
+      const { container } = render(TrendChart, { props: { ...props, onSelect, onZoomChange } });
+      pinWidth(container);
+      const hit = container.querySelector('rect.hit')!;
+
+      pointer(hit, 'pointerdown', 400);
+      pointer(hit, 'pointermove', 402); // 2px — under the 6px threshold
+      pointer(hit, 'pointerup', 402);
+      await Promise.resolve();
+
+      expect(onSelect).toHaveBeenCalledWith(2);
+      expect(onZoomChange).not.toHaveBeenCalled();
+      expect(container.querySelector('.drag-band')).toBeNull();
+    });
+
+    it('sets zoomDomain on a drag past the threshold, instead of pinning', async () => {
+      const onSelect = vi.fn();
+      const onZoomChange = vi.fn();
+      const { container } = render(TrendChart, { props: { ...props, onSelect, onZoomChange } });
+      pinWidth(container);
+      const hit = container.querySelector('rect.hit')!;
+
+      pointer(hit, 'pointerdown', 25.6); // index 0
+      pointer(hit, 'pointermove', 418.1); // index 2 — well past the threshold
+      pointer(hit, 'pointerup', 418.1);
+      await Promise.resolve();
+
+      expect(onZoomChange).toHaveBeenCalledWith([0, 2]);
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it('orders a right-to-left drag into an ascending domain', async () => {
+      const onZoomChange = vi.fn();
+      const { container } = render(TrendChart, { props: { ...props, onZoomChange } });
+      pinWidth(container);
+      const hit = container.querySelector('rect.hit')!;
+
+      pointer(hit, 'pointerdown', 614.4); // index 3
+      pointer(hit, 'pointermove', 221.9); // index 1
+      pointer(hit, 'pointerup', 221.9);
+      await Promise.resolve();
+
+      expect(onZoomChange).toHaveBeenCalledWith([1, 3]);
+    });
+
+    it('shows a selection band while dragging, past the threshold', async () => {
+      const { container } = render(TrendChart, { props });
+      pinWidth(container);
+      const hit = container.querySelector('rect.hit')!;
+
+      pointer(hit, 'pointerdown', 25.6);
+      pointer(hit, 'pointermove', 30); // still under threshold
+      await Promise.resolve();
+      expect(container.querySelector('.drag-band')).toBeNull();
+
+      pointer(hit, 'pointermove', 300); // now past it
+      await Promise.resolve();
+      expect(container.querySelector('.drag-band')).not.toBeNull();
+    });
+
+    it('abandons an in-progress drag on pointerleave — no zoom applied', async () => {
+      const onZoomChange = vi.fn();
+      const { container } = render(TrendChart, { props: { ...props, onZoomChange } });
+      pinWidth(container);
+      const hit = container.querySelector('rect.hit')!;
+
+      pointer(hit, 'pointerdown', 25.6);
+      pointer(hit, 'pointermove', 400);
+      await Promise.resolve();
+      expect(container.querySelector('.drag-band')).not.toBeNull();
+
+      pointer(hit, 'pointerleave', 400);
+      pointer(hit, 'pointerup', 400);
+      await Promise.resolve();
+
+      expect(onZoomChange).not.toHaveBeenCalled();
+      expect(container.querySelector('.drag-band')).toBeNull();
+    });
+
+    it('confines the drawn labels and points to the zoomed window', () => {
+      const { container } = render(TrendChart, { props: { ...props, zoomDomain: [1, 2] } });
+      const ticks = [...container.querySelectorAll('text.axis-tick.x')].map((t) => t.textContent);
+      expect(ticks).toEqual(['2 Aug', '3 Aug']);
+    });
+
+    it('resolves a hover to an index inside the zoomed window, not the full lattice', async () => {
+      const { container } = render(TrendChart, {
+        props: { ...props, zoomDomain: [2, 3] } // only "3 Aug"/30 and "4 Aug"/40 visible
+      });
+      pinWidth(container);
+      const hit = container.querySelector('rect.hit')!;
+
+      // Left edge of the plot now means the START of the zoom window (index 2), not index 0.
+      pointer(hit, 'pointermove', 1);
+      await Promise.resolve();
+      expect(container.querySelector('.tip-title')?.textContent).toBe('3 Aug');
+    });
+
+    it('resets zoomDomain on double-click', async () => {
+      const onZoomChange = vi.fn();
+      const { container } = render(TrendChart, {
+        props: { ...props, zoomDomain: [1, 2], onZoomChange }
+      });
+      const hit = container.querySelector('rect.hit')!;
+
+      hit.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      await Promise.resolve();
+
+      expect(onZoomChange).toHaveBeenCalledWith(null);
+      // Un-zoomed again: all four labels are candidates for a tick.
+      const ticks = [...container.querySelectorAll('text.axis-tick.x')].map((t) => t.textContent);
+      expect(ticks).toEqual(['1 Aug', '2 Aug', '3 Aug', '4 Aug']);
+    });
+
+    it('no-ops a double-click when nothing is zoomed', async () => {
+      const onZoomChange = vi.fn();
+      const { container } = render(TrendChart, { props: { ...props, onZoomChange } });
+      const hit = container.querySelector('rect.hit')!;
+
+      hit.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      await Promise.resolve();
+      expect(onZoomChange).not.toHaveBeenCalled();
+    });
+
+    it('suppresses the on-chart cursor for a pinned index scrolled out of the zoom window', () => {
+      // Pinned at index 0 ("1 Aug"), but zoomed to [2, 3] — the pin is not currently visible here.
+      const { container } = render(TrendChart, {
+        props: { ...props, selectedIndex: 0, zoomDomain: [2, 3] }
+      });
+      expect(container.querySelector('line.cursor')).toBeNull();
+      expect(container.querySelector('circle.cursor-dot')).toBeNull();
+    });
+
+    it('still draws the cursor once the pinned index is back inside the zoom window', () => {
+      const { container } = render(TrendChart, {
+        props: { ...props, selectedIndex: 2, zoomDomain: [2, 3] }
+      });
+      expect(container.querySelector('line.cursor')).not.toBeNull();
+    });
+
+    it('rescales the y-axis to only what is visible when zoomed', () => {
+      // Full series spans 10–40; the zoomed window [0, 1] spans only 10–20.
+      const full = render(TrendChart, { props: { ...props, yAxis: true } });
+      const fullTicks = [...full.container.querySelectorAll('text.axis-tick.y')].map((t) => t.textContent);
+      cleanup();
+
+      const zoomed = render(TrendChart, { props: { ...props, yAxis: true, zoomDomain: [0, 1] } });
+      const zoomedTicks = [...zoomed.container.querySelectorAll('text.axis-tick.y')].map(
+        (t) => t.textContent
+      );
+      expect(zoomedTicks).not.toEqual(fullTicks);
+    });
+  });
 });
